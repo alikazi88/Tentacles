@@ -1,87 +1,9 @@
 import {
-    Activity, ArrowUpRight, Calendar, ChevronDown, Cpu, FileBox,
-    Image as ImageIcon, Layers, Mic, Plus, Send, Sparkles, TerminalSquare,
-    Zap, Maximize2, FileText, CheckCircle2
+    ArrowUpRight, Calendar, ChevronDown, FileBox,
+    Image as ImageIcon, Mic, Plus, Send, Sparkles,
+    Zap, Maximize2, FileText
 } from 'lucide-react'
 
-// Helper for the gauge chart in Synced Records
-const SemiCircleGauge = ({ percentage }: { percentage: number }) => {
-    const radius = 60
-    const circumference = radius * Math.PI
-    const strokeDashoffset = circumference - (percentage / 100) * circumference
-
-    return (
-        <div className="relative w-full flex justify-center mt-6">
-            <svg className="w-48 h-24 transform rotate-180" viewBox="0 0 140 70">
-                {/* Background Arc */}
-                <path
-                    d="M 10,70 A 60,60 0 0,1 130,70"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.05)"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                />
-                {/* Foreground Arc */}
-                <path
-                    d="M 10,70 A 60,60 0 0,1 130,70"
-                    fill="none"
-                    stroke="#D4F64D"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    className="drop-shadow-[0_0_8px_rgba(212,246,77,0.5)] transition-all duration-1000 ease-out"
-                />
-                <circle cx="120" cy="55" r="4" fill="#D4F64D" className="shadow-[0_0_10px_#D4F64D]" />
-            </svg>
-            <div className="absolute bottom-0 inset-x-0 flex flex-col items-center justify-end pb-2">
-                <span className="text-3xl font-bold tracking-tight text-white">{percentage},49<span className="text-xl text-textSecondary">%</span></span>
-            </div>
-        </div>
-    )
-}
-
-// Helper for sparklines
-const Sparkline = ({ count, activeIndex, color = '#D4F64D' }: { count: number, activeIndex?: number, color?: string }) => {
-    return (
-        <div className="flex items-end gap-[3px] h-12 w-full mt-auto pt-4 border-t border-borderLight/50">
-            {[...Array(count)].map((_, i) => {
-                const height = 20 + Math.random() * 80
-                const isActive = i === activeIndex
-                return (
-                    <div
-                        key={i}
-                        className={`flex-1 rounded-t-sm transition-all duration-500 hover:bg-white/30 ${isActive ? '' : 'bg-surfaceHover'}`}
-                        style={{
-                            height: `${height}%`,
-                            backgroundColor: isActive ? color : undefined,
-                            boxShadow: isActive ? `0 0 10px ${color}80` : 'none'
-                        }}
-                    />
-                )
-            })}
-        </div>
-    )
-}
-
-// Waveform Sparkline
-const WaveformSparkline = () => {
-    return (
-        <div className="absolute bottom-6 left-6 right-6 h-16 flex items-end justify-between gap-[2px] opacity-60">
-            {[...Array(40)].map((_, i) => {
-                const h = 20 + Math.sin(i * 0.4) * 30 + Math.random() * 50
-                const isHighlight = i === 28
-                return (
-                    <div
-                        key={i}
-                        className={`w-full rounded-full ${isHighlight ? 'bg-neon w-1.5 shadow-[0_0_10px_#D4F64D]' : 'bg-textSecondary/40'}`}
-                        style={{ height: `${h}%` }}
-                    />
-                )
-            })}
-        </div>
-    )
-}
 
 export function Dashboard() {
     return (
@@ -161,191 +83,601 @@ export function Dashboard() {
                 {/* LEFT COLUMN (Spans 9) */}
                 <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
 
-                    {/* Row 1: Top 3 Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Row 1: Primary Large Cards */}
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-                        {/* Processed Items */}
-                        <div className="glass-card bg-surface/40 p-5 flex flex-col justify-between hover:border-neon/30 transition-colors">
-                            <div className="flex items-center gap-2 text-sm text-textSecondary font-medium">
-                                <Layers size={16} /> Processed Items
-                            </div>
-                            <div className="my-6">
-                                <span className="text-[2.75rem] font-bold text-white tracking-tight leading-none">97,22<span className="text-2xl text-textSecondary">%</span></span>
-                            </div>
-                            <div>
-                                <div className="flex items-center justify-between text-xs mb-2">
-                                    <div><div className="text-white font-medium">16.4K</div><div className="text-textSecondary/60 mt-0.5">Auto-Processed</div></div>
-                                    <div className="text-right"><div className="text-white font-medium">20K</div><div className="text-textSecondary/60 mt-0.5">Pending Check</div></div>
+                        {/* Card 1: Cost Intelligence */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">💰</span> Cost Intelligence
+                                </span>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                    <span className="text-textSecondary/70">This Week <ChevronDown size={12} className="inline" /></span>
+                                    <span className="text-neon ml-2 cursor-pointer hover:underline">Details</span>
                                 </div>
-                                {/* Progress bar with neon indicator */}
-                                <div className="w-full h-2.5 bg-[#1F1F22] rounded-full overflow-hidden flex relative border border-white/5">
-                                    <div className="h-full bg-white w-3/4 shadow-[0_0_10px_rgba(255,255,255,0.3)] z-10"></div>
-                                    <div className="h-full bg-gradient-to-r from-[#8C9A61] to-[#D4F64D] w-1/4 relative">
-                                        <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-white shadow-[0_0_8px_#fff]"></div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 mb-6 relative z-10">
+                                <div>
+                                    <div className="text-3xl font-bold text-white leading-none mb-1">$12.45</div>
+                                    <div className="text-[11px] text-textSecondary">Today</div>
+                                </div>
+                                <div className="text-center border-x border-white/5">
+                                    <div className="text-3xl font-bold text-neon leading-none mb-1">$34.50</div>
+                                    <div className="text-[11px] text-textSecondary">Saved</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-3xl font-bold text-white leading-none mb-1">73%</div>
+                                    <div className="text-[11px] text-textSecondary">Efficiency</div>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-px bg-white/5 mb-6"></div>
+
+                            <div className="mb-6">
+                                <div className="flex justify-between text-xs text-white mb-2 font-medium">
+                                    <span>Local vs Cloud Usage</span>
+                                    <span>85/15%</span>
+                                </div>
+                                <div className="w-full h-2 rounded-full overflow-hidden flex bg-[#1F1F22]">
+                                    <div className="h-full bg-neon w-[85%] shadow-[0_0_8px_#D4F64D]"></div>
+                                    <div className="h-full bg-white/20 w-[15%]"></div>
+                                </div>
+                                <div className="text-[11px] text-textSecondary mt-2">
+                                    You saved <span className="text-neon">$34.50</span> this week by using local models
+                                </div>
+                            </div>
+
+                            <div className="flex-1 space-y-3 mt-2">
+                                <div className="text-xs font-semibold text-white mb-2">Top Cost Drivers:</div>
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-textSecondary flex items-center gap-2">• GPT-4o <span className="opacity-50">(complex analysis)</span></span>
+                                    <span className="font-mono text-white">$8.20</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-textSecondary flex items-center gap-2">• Claude 3.5 Sonnet <span className="opacity-50">(coding)</span></span>
+                                    <span className="font-mono text-white">$3.45</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-textSecondary flex items-center gap-2">• Local models</span>
+                                    <span className="font-mono text-neon text-opacity-80">$0.00 (free)</span>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 bg-[#262628] border border-neon/20 p-3 rounded-xl flex items-start gap-3 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-neon/[0.03] group-hover:bg-neon/[0.08] transition-colors"></div>
+                                <span className="text-lg relative z-10">🎯</span>
+                                <div className="relative z-10">
+                                    <p className="text-[11px] text-white font-medium mb-1">Suggestion: Switch "General Chat" to Llama 3.1 8B</p>
+                                    <p className="text-[10px] text-neon/80">Potential savings: $5.20/week</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Card 2: Agent Performance */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">🤖</span> Agent Performance
+                                </span>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                    <span className="text-textSecondary/70">Today <ChevronDown size={12} className="inline" /></span>
+                                    <span className="text-neon ml-2 cursor-pointer hover:underline">Manage</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-white bg-black/20 p-3 rounded-xl border border-white/5 mb-6">
+                                <div><span className="text-textSecondary mr-1">Active Agents:</span> 4</div>
+                                <div><span className="text-textSecondary mr-1">Tasks Completed:</span> 147</div>
+                                <div><span className="text-textSecondary mr-1">Avg Latency:</span> 1.2s</div>
+                            </div>
+
+                            <div className="space-y-4 mb-6 flex-1">
+                                {[
+                                    { icon: "🎯", name: "General", val: 100, color: "bg-white", tasks: 52, time: "0.8s" },
+                                    { icon: "💻", name: "Coder", val: 75, color: "bg-neon shadow-[0_0_8px_#D4F64D]", tasks: 38, time: "1.4s" },
+                                    { icon: "🔍", name: "Researcher", val: 45, color: "bg-white/60", tasks: 24, time: "2.1s" },
+                                    { icon: "📝", name: "Writer", val: 30, color: "bg-white/40", tasks: 18, time: "0.9s" },
+                                    { icon: "📊", name: "Analyst", val: 20, color: "bg-white/20", tasks: 15, time: "1.8s" }
+                                ].map((agent, i) => (
+                                    <div key={i} className="flex items-center text-[11px] group">
+                                        <div className="w-24 flex items-center gap-2 text-white/80">
+                                            <span>{agent.icon}</span> {agent.name}
+                                        </div>
+                                        <div className="flex-1 h-1.5 bg-[#1F1F22] rounded-full overflow-hidden flex relative mr-4">
+                                            <div className={`h-full ${agent.color}`} style={{ width: `${agent.val}%` }}></div>
+                                        </div>
+                                        <div className="w-16 text-right text-textSecondary">{agent.tasks} tasks</div>
+                                        <div className="w-10 text-right font-mono text-white/80">{agent.time}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="border-t border-white/5 pt-5 space-y-3">
+                                <div className="text-[11px] font-semibold text-white">Agent Health:</div>
+                                <div className="flex gap-4 text-[10px] text-textSecondary bg-surface/50 p-2 rounded-lg border border-white/5 w-fit">
+                                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span> 4 Active</span>
+                                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500"></span> 1 Busy</span>
+                                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500"></span> 0 Error</span>
+                                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-white/40"></span> 2 Standby</span>
+                                </div>
+
+                                <div className="pt-2 space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[10px]">
+                                        <span className="text-white">🏆 Most Efficient:</span>
+                                        <span className="text-textSecondary">Coder Agent <span className="opacity-60">(94% local execution)</span></span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[10px]">
+                                        <span className="text-yellow-500 drop-shadow-[0_0_3px_rgb(234,179,8)]">⚠️ Needs Attention:</span>
+                                        <span className="text-textSecondary">Researcher <span className="opacity-60">(high cloud dependency)</span></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Synced Records */}
-                        <div className="glass-card bg-surface/40 p-5 flex flex-col justify-between hover:border-neon/30 transition-colors relative overflow-hidden">
-                            <div className="flex items-center gap-2 text-sm text-textSecondary font-medium relative z-10">
-                                <Cpu size={16} /> Synced Records
-                            </div>
-
-                            <div className="flex items-center justify-between text-xs mt-4 relative z-10">
-                                <div><div className="text-white font-medium">16.4K</div><div className="text-textSecondary/60 mt-0.5">Auto-Processed</div></div>
-                                <div className="text-right"><div className="text-white font-medium">20K</div><div className="text-textSecondary/60 mt-0.5">Pending Check</div></div>
-                            </div>
-
-                            <SemiCircleGauge percentage={80} />
-                        </div>
-
-                        {/* Anomalies */}
-                        <div className="glass-card bg-surface/40 p-5 flex flex-col justify-between hover:border-neon/30 transition-colors">
-                            <div className="flex items-center gap-2 text-sm text-textSecondary font-medium">
-                                <Activity size={16} /> Anomalies
-                            </div>
-                            <div className="my-4">
-                                <span className="text-[2.5rem] font-bold text-white tracking-tight leading-none">15,12<span className="text-xl text-textSecondary">%</span></span>
-                            </div>
-                            <div className="flex-1 flex flex-col justify-end">
-                                <div className="flex items-center justify-between text-xs mb-3">
-                                    <div><div className="text-white font-medium">2.84K</div><div className="text-textSecondary/60 mt-0.5">Detected</div></div>
-                                    <div className="text-right"><div className="text-white font-medium">20.8K</div><div className="text-textSecondary/60 mt-0.5">Total Items</div></div>
-                                </div>
-                                <Sparkline count={32} activeIndex={2} color="#fff" />
-                            </div>
-                        </div>
-
                     </div>
 
-                    {/* Row 2: Wide Charts */}
+                    {/* Row 2: Secondary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Utilization */}
-                        <div className="glass-card bg-surface/40 p-6 relative min-h-[220px] group hover:border-neon/30 transition-colors">
-                            <div className="flex items-center justify-between mb-2">
+                        {/* Card 3: Memory Insights */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
                                 <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
-                                    <TerminalSquare size={16} /> Utilization
+                                    <span className="text-lg">🧠</span> Memory Insights
                                 </span>
-                                <ArrowUpRight size={16} className="text-textSecondary group-hover:text-white transition-colors" />
-                            </div>
-
-                            <div className="grid grid-cols-3 mt-4 relative z-10">
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">88%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Syncs</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">75%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Fetches</div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-center justify-center">
-                                    <div className="text-xs text-textSecondary/80 mb-1">Average Account Stats</div>
-                                    <div className="text-[2.5rem] font-bold text-white tracking-tight leading-none">58,2<span className="text-xl text-textSecondary">%</span></div>
-                                </div>
-                                <div className="space-y-4 text-right">
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">67%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Manuals</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">15%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Autosync</div>
-                                    </div>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Explore</span>
+                                    <span className="text-black bg-neon hover:brightness-110 cursor-pointer transition-colors px-2 py-1 rounded">Optimize</span>
                                 </div>
                             </div>
 
-                            <WaveformSparkline />
+                            <div className="grid grid-cols-3 gap-2 mb-6 text-center">
+                                <div className="bg-[#1A1A1C] border border-white/5 rounded-xl p-3">
+                                    <div className="text-2xl font-bold text-white mb-1">2,341</div>
+                                    <div className="text-[10px] text-textSecondary uppercase tracking-wider">Total Entities</div>
+                                </div>
+                                <div className="bg-[#1A1A1C] border border-white/5 rounded-xl p-3">
+                                    <div className="text-2xl font-bold text-white mb-1">+23</div>
+                                    <div className="text-[10px] text-textSecondary uppercase tracking-wider">Today New</div>
+                                </div>
+                                <div className="bg-[#1A1A1C] border border-neon/20 rounded-xl p-3">
+                                    <div className="text-2xl font-bold text-neon mb-1">89%</div>
+                                    <div className="text-[10px] text-neon/70 uppercase tracking-wider">Relevance</div>
+                                </div>
+                            </div>
 
-                            <div className="absolute pl-6 pr-6 bottom-3 inset-x-0 flex justify-between text-[10px] text-textSecondary/50 font-medium">
-                                <span>Feb</span>
-                                <span>Mar</span>
+                            <div className="mb-6">
+                                <div className="text-[11px] font-semibold text-white mb-3">Memory Composition:</div>
+                                <div className="flex gap-4 text-[11px]">
+                                    <span className="text-textSecondary"><span className="text-white">👤 45%</span> People</span>
+                                    <span className="text-textSecondary"><span className="text-white">💼 28%</span> Projects</span>
+                                    <span className="text-textSecondary"><span className="text-white">📄 15%</span> Files</span>
+                                    <span className="text-textSecondary"><span className="text-white">🏷️ 12%</span> Topics</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-black/20 border border-white/5 rounded-xl p-4 flex-1">
+                                <div className="text-[11px] font-semibold text-white mb-3">Recent Memory Activity:</div>
+                                <div className="space-y-3">
+                                    <div className="flex gap-3 text-[11px]">
+                                        <span className="text-textSecondary/60 font-mono w-12">2:34 PM</span>
+                                        <span className="text-textSecondary">Remembered: <span className="text-white">"Sarah prefers morning meetings"</span></span>
+                                    </div>
+                                    <div className="flex gap-3 text-[11px]">
+                                        <span className="text-textSecondary/60 font-mono w-12">1:15 PM</span>
+                                        <span className="text-textSecondary">Linked: <span className="text-white">"Q4 Budget"</span> → <span className="text-white">"Cloud Costs"</span> <span className="opacity-50">(concern)</span></span>
+                                    </div>
+                                    <div className="flex gap-3 text-[11px]">
+                                        <span className="text-textSecondary/60 font-mono w-12">11:30 AM</span>
+                                        <span className="text-textSecondary">Extracted: New person <span className="text-white">"David Chen"</span> from email</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex items-center gap-2 text-[11px]">
+                                <span className="text-textSecondary">🔍 Top Searches:</span>
+                                <span className="text-neon/90 bg-neon/10 px-2 py-0.5 rounded">"budget"</span>
+                                <span className="text-neon/90 bg-neon/10 px-2 py-0.5 rounded">"Sarah"</span>
+                                <span className="text-neon/90 bg-neon/10 px-2 py-0.5 rounded">"API performance"</span>
                             </div>
                         </div>
 
-                        {/* Timely Closures */}
-                        <div className="glass-card bg-surface/40 p-6 relative min-h-[220px] group hover:border-neon/30 transition-colors">
-                            <div className="flex items-center justify-between mb-2">
+                        {/* Card 4: Skill Ecosystem */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
                                 <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
-                                    <CheckCircle2 size={16} /> Timely Closures
+                                    <span className="text-lg">🔧</span> Skill Ecosystem
                                 </span>
-                                <ArrowUpRight size={16} className="text-textSecondary group-hover:text-white transition-colors" />
-                            </div>
-
-                            <div className="grid grid-cols-3 mt-4 relative z-10">
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">92</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Done</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">32%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Active</div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-center justify-center">
-                                    <div className="text-xs text-textSecondary/80 mb-1">Average Account Stats</div>
-                                    <div className="text-[2.5rem] font-bold text-white tracking-tight leading-none">88,5<span className="text-xl text-textSecondary">%</span></div>
-                                </div>
-                                <div className="space-y-4 text-right">
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">70/0%</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">On Time</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xl font-bold text-white leading-none">30/5</div>
-                                        <div className="text-[10px] text-textSecondary/70 uppercase tracking-wider mt-1">Timely</div>
-                                    </div>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Studio</span>
+                                    <span className="text-black bg-neon hover:brightness-110 cursor-pointer transition-colors px-2 py-1 rounded">Marketplace</span>
                                 </div>
                             </div>
 
-                            <WaveformSparkline />
+                            <div className="flex items-center justify-between text-xs text-white bg-black/20 p-3 rounded-xl border border-white/5 mb-6">
+                                <div><span className="text-textSecondary mr-1">Installed:</span> 12</div>
+                                <div><span className="text-textSecondary mr-1">Active Today:</span> 8</div>
+                                <div><span className="text-textSecondary mr-1">Custom Built:</span> 3</div>
+                            </div>
 
-                            <div className="absolute pl-6 pr-6 bottom-3 inset-x-0 flex justify-between text-[10px] text-textSecondary/50 font-medium">
-                                <span>Feb</span>
-                                <span>Mar</span>
+                            <div className="flex-1">
+                                <div className="text-[11px] font-semibold text-white mb-3">Most Used Skills:</div>
+                                <div className="space-y-3">
+                                    {[
+                                        { icon: "📁", name: "File Ops", val: 89, color: "bg-white" },
+                                        { icon: "🔍", name: "Web Search", val: 67, color: "bg-neon shadow-[0_0_8px_#D4F64D]" },
+                                        { icon: "💻", name: "Code Exec", val: 45, color: "bg-white/60" },
+                                        { icon: "🧠", name: "Memory", val: 34, color: "bg-white/40" },
+                                        { icon: "📧", name: "Gmail", val: 23, color: "bg-white/20" }
+                                    ].map((skill, i) => (
+                                        <div key={i} className="flex items-center text-[11px]">
+                                            <div className="w-24 flex items-center gap-2 text-white/80">
+                                                <span>{skill.icon}</span> {skill.name}
+                                            </div>
+                                            <div className="flex-1 h-1.5 bg-[#1F1F22] rounded-full overflow-hidden flex relative mr-4">
+                                                <div className={`h-full ${skill.color}`} style={{ width: `${skill.val}%` }}></div>
+                                            </div>
+                                            <div className="w-14 text-right text-textSecondary">{skill.val} uses</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="mt-6 border-t border-white/5 pt-4">
+                                <div className="flex items-center gap-4 text-[10px] text-textSecondary mb-4">
+                                    <span className="text-white font-semibold">Skill Health:</span>
+                                    <span className="flex items-center gap-1.5"><span className="text-green-500">✅</span> 11 Working</span>
+                                    <span className="flex items-center gap-1.5"><span className="text-yellow-500">⚠️</span> 1 Needs Update</span>
+                                    <span className="flex items-center gap-1.5"><span className="text-red-500">❌</span> 0 Failed</span>
+                                </div>
+                                <div className="bg-[#1A1A1C] border border-white/5 rounded-xl p-3">
+                                    <div className="text-[11px] font-semibold text-white mb-2 flex justify-between items-center">
+                                        <span>🆕 Marketplace Highlights:</span>
+                                        <span className="text-neon/80 text-[10px] cursor-pointer hover:underline">Browse 50+</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                        <div className="text-textSecondary flex justify-between">Notion Sync <span className="text-yellow-500">4.9★</span></div>
+                                        <div className="text-textSecondary flex justify-between">Slack Bot <span className="text-yellow-500">4.7★</span></div>
+                                        <div className="text-textSecondary flex justify-between">Figma Export <span className="text-yellow-500">4.8★</span></div>
+                                        <div className="text-textSecondary flex justify-between">Jira Sync <span className="text-yellow-500">4.6★</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                     </div>
 
-                    {/* Row 3: Avatars */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="glass-card bg-surface/30 p-4 flex items-center justify-between group hover:bg-surface/60 transition-colors cursor-pointer border border-borderLight/30">
-                            <div className="flex items-center gap-3">
-                                <img src="https://i.pravatar.cc/150?u=1" alt="Alma" className="w-10 h-10 rounded-full border border-white/10" />
-                                <div>
-                                    <div className="text-sm font-semibold text-white">Alma Lawson</div>
-                                    <div className="text-[11px] text-textSecondary">alma.lawson@example.com</div>
+                    {/* Row 3: Tertiary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* Card 5: Model Efficiency */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">🧠</span> Model Efficiency
+                                </span>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Configure</span>
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Details</span>
                                 </div>
                             </div>
-                            <ArrowUpRight size={16} className="text-textSecondary group-hover:text-white transition-colors" />
+
+                            <div className="text-[11px] font-semibold text-white mb-3">Smart Routing Results:</div>
+                            <div className="bg-[#1A1A1C] border border-white/5 rounded-xl overflow-hidden mb-6">
+                                <table className="w-full text-[11px] text-left">
+                                    <thead className="bg-white/5 text-textSecondary border-b border-white/5">
+                                        <tr>
+                                            <th className="px-3 py-2 font-medium">Task Type</th>
+                                            <th className="px-3 py-2 font-medium">Routed To</th>
+                                            <th className="px-3 py-2 font-medium">Avg Time</th>
+                                            <th className="px-3 py-2 font-medium">Cost</th>
+                                            <th className="px-3 py-2 font-medium">★</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5 text-white/90">
+                                        <tr className="hover:bg-white/5 transition-colors">
+                                            <td className="px-3 py-2">Simple QA</td>
+                                            <td className="px-3 py-2 text-neon/90">Llama 3.1 8B</td>
+                                            <td className="px-3 py-2 font-mono">0.8s</td>
+                                            <td className="px-3 py-2 font-mono">$0.00</td>
+                                            <td className="px-3 py-2 text-yellow-500">95%</td>
+                                        </tr>
+                                        <tr className="hover:bg-white/5 transition-colors">
+                                            <td className="px-3 py-2">Code Gen</td>
+                                            <td className="px-3 py-2 text-neon/90">CodeLlama 13B</td>
+                                            <td className="px-3 py-2 font-mono">1.2s</td>
+                                            <td className="px-3 py-2 font-mono">$0.00</td>
+                                            <td className="px-3 py-2 text-yellow-500">92%</td>
+                                        </tr>
+                                        <tr className="hover:bg-white/5 transition-colors">
+                                            <td className="px-3 py-2">Complex Analysis</td>
+                                            <td className="px-3 py-2">Claude 3.5</td>
+                                            <td className="px-3 py-2 font-mono">2.4s</td>
+                                            <td className="px-3 py-2 font-mono">$0.05</td>
+                                            <td className="px-3 py-2 text-yellow-500">98%</td>
+                                        </tr>
+                                        <tr className="hover:bg-white/5 transition-colors">
+                                            <td className="px-3 py-2">Creative</td>
+                                            <td className="px-3 py-2">GPT-4o</td>
+                                            <td className="px-3 py-2 font-mono">1.8s</td>
+                                            <td className="px-3 py-2 font-mono">$0.03</td>
+                                            <td className="px-3 py-2 text-yellow-500">88%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="flex items-center gap-6 text-[11px] mb-6">
+                                <div><span className="text-white font-medium">Routing Accuracy:</span> <span className="text-neon">94%</span> <span className="text-textSecondary">(correct mode chosen)</span></div>
+                                <div><span className="text-white font-medium">Fallback Rate:</span> <span className="text-yellow-500">6%</span> <span className="text-textSecondary">(local failed, used cloud)</span></div>
+                            </div>
+
+                            <div className="mt-auto bg-[#262628] border border-white/10 p-3 rounded-xl flex items-start gap-3 relative overflow-hidden group">
+                                <span className="text-lg relative z-10 opacity-80">💡</span>
+                                <div className="relative z-10">
+                                    <p className="text-[11px] text-white font-medium mb-1">Optimization: CodeLlama handling 95% of coding tasks</p>
+                                    <p className="text-[10px] text-textSecondary">Consider fine-tuning for remaining 5% edge cases</p>
+                                </div>
+                            </div>
+
+                            <div className="text-center mt-4">
+                                <span className="text-[10px] text-neon/60 cursor-pointer hover:underline hover:text-neon transition-colors">View All 847 Routing Decisions</span>
+                            </div>
                         </div>
 
-                        <div className="glass-card bg-surface/30 p-4 flex items-center justify-between group hover:bg-surface/60 transition-colors cursor-pointer border border-borderLight/30">
-                            <div className="flex items-center gap-3">
-                                <img src="https://i.pravatar.cc/150?u=2" alt="Cody" className="w-10 h-10 rounded-full border border-white/10" />
-                                <div>
-                                    <div className="text-sm font-semibold text-white">Cody Fisher</div>
-                                    <div className="text-[11px] text-textSecondary">cody.fisher@example.com</div>
+                        {/* Card 6: Active Workflows */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">⚡</span> Active Workflows
+                                </span>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Builder</span>
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">History</span>
                                 </div>
                             </div>
-                            <ArrowUpRight size={16} className="text-textSecondary group-hover:text-white transition-colors" />
+
+                            <div className="flex items-center justify-between text-xs text-white bg-black/20 p-3 rounded-xl border border-white/5 mb-6">
+                                <div><span className="text-textSecondary mr-1">Running:</span> <span className="text-neon">3</span></div>
+                                <div><span className="text-textSecondary mr-1">Scheduled:</span> 5</div>
+                                <div><span className="text-textSecondary mr-1">Completed Today:</span> 12</div>
+                            </div>
+
+                            <div className="space-y-3 mb-6 flex-1">
+                                <div className="bg-[#1A1A1C] border border-neon/20 p-3 rounded-xl">
+                                    <div className="flex items-center justify-between text-[11px] mb-2">
+                                        <div className="flex items-center gap-2 text-white font-medium">
+                                            <span className="text-neon animate-pulse">🔄</span> Email Triage
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-neon bg-neon/10 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">Running</span>
+                                            <span className="text-textSecondary">● 12 processed</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-[10px] text-textSecondary pl-6 flex items-center gap-1.5">
+                                        <span>└─→</span>
+                                        <span className="text-white/80">Researcher</span>
+                                        <span className="text-textSecondary/50">→</span>
+                                        <span className="text-white/80">Coder</span>
+                                        <span className="text-textSecondary/50">→</span>
+                                        <span className="text-white/80">Archive</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#1A1A1C] border border-white/5 p-3 rounded-xl opacity-80">
+                                    <div className="flex items-center justify-between text-[11px] mb-2">
+                                        <div className="flex items-center gap-2 text-white font-medium">
+                                            <span>⏰</span> Daily Standup
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-white/60 bg-white/10 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">Scheduled</span>
+                                            <span className="text-textSecondary">9:00 AM tomorrow</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-[10px] text-textSecondary pl-6 flex items-center gap-1.5">
+                                        <span>└─→</span>
+                                        <span className="text-white/80">Analyst</span>
+                                        <span className="text-textSecondary/50">→</span>
+                                        <span className="text-white/80">Slack #standup</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#1A1A1C] border border-white/5 p-3 rounded-xl opacity-60">
+                                    <div className="flex items-center justify-between text-[11px] mb-2">
+                                        <div className="flex items-center gap-2 text-white font-medium">
+                                            <span className="text-green-500">✅</span> Code Review
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">Completed</span>
+                                            <span className="text-textSecondary">23 PRs reviewed</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-[10px] text-textSecondary pl-6 flex items-center gap-1.5">
+                                        <span>└─→</span>
+                                        <span className="text-white/80">Coder</span>
+                                        <span className="text-textSecondary/50">→</span>
+                                        <span className="text-white/80">GitHub</span>
+                                        <span className="text-textSecondary/50">→</span>
+                                        <span className="text-white/80">Memory</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-white/5 pt-4 space-y-3">
+                                <div className="text-[11px] font-semibold text-white mb-2">Workflow Performance:</div>
+                                <div className="flex items-center justify-between text-[11px] text-white bg-surface/50 p-2.5 rounded-lg border border-white/5">
+                                    <div><span className="text-textSecondary mr-1">Avg Execution:</span> 4.2s</div>
+                                    <div><span className="text-textSecondary mr-1">Success Rate:</span> <span className="text-green-500">98%</span></div>
+                                    <div><span className="text-textSecondary mr-1">Time Saved:</span> <span className="text-neon">14h</span></div>
+                                </div>
+
+                                <div className="flex items-center gap-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
+                                    <span>🔔</span>
+                                    <span>1 Workflow needs attention: "Code Review" failed 2x</span>
+                                    <span className="ml-auto underline cursor-pointer hover:text-yellow-400">View Logs</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="glass-card bg-surface/30 p-4 flex items-center justify-between group hover:bg-surface/60 transition-colors cursor-pointer border border-borderLight/30">
-                            <div className="flex items-center gap-3">
-                                <img src="https://i.pravatar.cc/150?u=3" alt="Devon" className="w-10 h-10 rounded-full border border-white/10" />
-                                <div>
-                                    <div className="text-sm font-semibold text-white">Devon Lane</div>
-                                    <div className="text-[11px] text-textSecondary">devon.lane@example.com</div>
+                    </div>
+
+                    {/* Row 4: Final Cards (System Health & Team Collab) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* Card 7: System Health */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">🔒</span> System Health & Security
+                                </span>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Audit Log</span>
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Settings</span>
                                 </div>
                             </div>
-                            <ArrowUpRight size={16} className="text-textSecondary group-hover:text-white transition-colors" />
+
+                            <div className="grid grid-cols-3 gap-2 mb-6 text-center">
+                                <div className="bg-[#1A1A1C] border border-green-500/20 rounded-xl p-3">
+                                    <div className="text-2xl mb-1 drop-shadow-[0_0_8px_#22c55e]">🟢</div>
+                                    <div className="text-[10px] text-textSecondary uppercase tracking-wider">Healthy</div>
+                                </div>
+                                <div className="bg-[#1A1A1C] border border-white/5 rounded-xl p-3">
+                                    <div className="text-2xl font-bold text-white mb-1">0</div>
+                                    <div className="text-[10px] text-textSecondary uppercase tracking-wider">Alerts</div>
+                                </div>
+                                <div className="bg-[#1A1A1C] border border-white/5 rounded-xl p-3">
+                                    <div className="text-2xl font-bold text-white mb-1">100%</div>
+                                    <div className="text-[10px] text-textSecondary uppercase tracking-wider">Uptime (7d)</div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="text-[11px] font-semibold text-white mb-3">Component Status:</div>
+                                <div className="space-y-2 text-[11px]">
+                                    <div className="flex justify-between items-center text-textSecondary">
+                                        <span className="flex items-center gap-2">● Local LLM (Ollama)</span>
+                                        <span className="text-white/80 border-b border-white/10 flex-1 mx-4 border-dotted leading-[0.5]"></span>
+                                        <span className="text-white flex items-center gap-1.5"><span className="text-[8px]">🟢</span> Online (4 models)</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-textSecondary">
+                                        <span className="flex items-center gap-2">● Cloud API (OpenAI)</span>
+                                        <span className="text-white/80 border-b border-white/10 flex-1 mx-4 border-dotted leading-[0.5]"></span>
+                                        <span className="text-white flex items-center gap-1.5"><span className="text-[8px]">🟢</span> Responsive (45ms)</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-textSecondary">
+                                        <span className="flex items-center gap-2">● Cloud API (Anthropic)</span>
+                                        <span className="text-white/80 border-b border-white/10 flex-1 mx-4 border-dotted leading-[0.5]"></span>
+                                        <span className="text-white flex items-center gap-1.5"><span className="text-[8px]">🟢</span> Responsive (62ms)</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-textSecondary">
+                                        <span className="flex items-center gap-2">● Vector DB (pgvector)</span>
+                                        <span className="text-white/80 border-b border-white/10 flex-1 mx-4 border-dotted leading-[0.5]"></span>
+                                        <span className="text-white flex items-center gap-1.5"><span className="text-[8px]">🟢</span> 2,341 indexed</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-textSecondary">
+                                        <span className="flex items-center gap-2">● WASM Sandbox</span>
+                                        <span className="text-white/80 border-b border-white/10 flex-1 mx-4 border-dotted leading-[0.5]"></span>
+                                        <span className="text-white flex items-center gap-1.5"><span className="text-[8px]">🟢</span> 12 skills active</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-black/20 border border-white/5 rounded-xl p-4 flex-1 mb-4">
+                                <div className="text-[11px] font-semibold text-white mb-3">Recent Security Events:</div>
+                                <div className="space-y-2.5">
+                                    <div className="flex items-start gap-2.5 text-[10px]">
+                                        <span className="text-green-500 mt-0.5">✅</span>
+                                        <div>
+                                            <span className="text-textSecondary/60 font-mono mr-2">14:32</span>
+                                            <span className="text-textSecondary">Skill "File Ops" accessed ~/Tentacles <span className="text-green-500/80">(allowed)</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-2.5 text-[10px]">
+                                        <span className="text-green-500 mt-0.5">✅</span>
+                                        <div>
+                                            <span className="text-textSecondary/60 font-mono mr-2">14:15</span>
+                                            <span className="text-textSecondary">Model switched: GPT-4o → Local <span className="text-white/60">(budget opt.)</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-2.5 text-[10px]">
+                                        <span className="text-green-500 mt-0.5">✅</span>
+                                        <div>
+                                            <span className="text-textSecondary/60 font-mono mr-2">13:58</span>
+                                            <span className="text-textSecondary">User approved web search for "API docs"</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 text-[10px] text-textSecondary">
+                                <span>🛡️</span> All 847 sandbox executions contained this week
+                            </div>
+                        </div>
+
+                        {/* Card 8: Team Collaboration */}
+                        <div className="glass-card bg-surface/40 p-6 flex flex-col group hover:border-neon/30 transition-colors">
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="flex items-center gap-2 text-sm text-textSecondary font-medium">
+                                    <span className="text-lg">👥</span> Team Collaboration <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/80 ml-1">Beta</span>
+                                </span>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Invite</span>
+                                    <span className="text-textSecondary hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-1 rounded">Manage</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-white bg-black/20 p-3 rounded-xl border border-white/5 mb-6">
+                                <div><span className="text-textSecondary mr-1">Team:</span> 5 members</div>
+                                <div><span className="text-textSecondary mr-1">Shared Agents:</span> 3</div>
+                                <div><span className="text-textSecondary mr-1">Team Memory:</span> 892</div>
+                            </div>
+
+                            <div className="mb-6 flex-1">
+                                <div className="text-[11px] font-semibold text-white mb-3">Shared Resources:</div>
+                                <div className="space-y-3 bg-[#1A1A1C] border border-white/5 rounded-xl p-4">
+                                    <div className="flex items-center justify-between text-[11px]">
+                                        <div className="flex items-center gap-2 text-white">
+                                            <span>🤖</span> Onboarding Agent
+                                        </div>
+                                        <div className="flex items-center gap-4 text-textSecondary">
+                                            <span>Used by 4 members</span>
+                                            <span className="font-mono w-16 text-right">234 chats</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[11px]">
+                                        <div className="flex items-center gap-2 text-white">
+                                            <span>🤖</span> Support Triage
+                                        </div>
+                                        <div className="flex items-center gap-4 text-textSecondary">
+                                            <span>Used by 3 members</span>
+                                            <span className="font-mono w-16 text-right">189 chats</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[11px]">
+                                        <div className="flex items-center gap-2 text-white">
+                                            <span>📊</span> Sales Analytics
+                                        </div>
+                                        <div className="flex items-center gap-4 text-textSecondary">
+                                            <span>Used by 2 members</span>
+                                            <span className="font-mono w-16 text-right">67 queries</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-neon/10 to-transparent border border-neon/20 rounded-xl p-4 mb-6">
+                                <div className="text-[11px] font-semibold text-white mb-2">Team Memory Insights:</div>
+                                <ul className="text-[11px] text-textSecondary space-y-1.5 list-disc pl-4">
+                                    <li>Most referenced: <span className="text-white">"Q4 Goals"</span> <span className="opacity-60">(mentioned 45 times)</span></li>
+                                    <li>New this week: <span className="text-white">"Product Launch"</span>, <span className="text-white">"Competitor Analysis"</span></li>
+                                </ul>
+                            </div>
+
+                            <button className="w-full py-2.5 rounded-xl border border-white/10 text-[11px] text-white hover:bg-white/5 transition-colors font-medium flex items-center justify-center gap-2">
+                                Upgrade to Team Plan <span className="text-textSecondary font-normal">- $29/mo for advanced collaboration</span>
+                            </button>
                         </div>
                     </div>
 
