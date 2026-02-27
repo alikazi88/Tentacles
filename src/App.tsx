@@ -8,6 +8,7 @@ import { Skills } from './routes/Skills'
 import { Memory } from './routes/Memory'
 import { Workflows } from './routes/Workflows'
 import { Models } from './routes/Models'
+import { ApplicationSettings } from './routes/Settings'
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
           <Route path="skills" element={<Skills />} />
           <Route path="memory" element={<Memory />} />
           <Route path="workflows" element={<Workflows />} />
-          <Route path="settings" element={<div className="text-white text-2xl font-bold p-8">Settings Placeholder</div>} />
+          <Route path="settings" element={<ApplicationSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>
