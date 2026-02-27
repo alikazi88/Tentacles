@@ -15,7 +15,9 @@ async fn main() {
     tracing::info!("Starting Intelligence Layer on 0.0.0.0:8080...");
 
     // 1. Initialize Sub-Systems
-    let db_url = "postgresql://postgres:postgres@db.ztlvxiihxzjegtssikmm.supabase.co:5432/postgres"; // Placeholder for actual password logic
+    // Verified IPv4 Transaction Pooler (Port 6543) from Supabase Dashboard
+    // statement_cache_capacity=0 is MANDATORY for transaction pooling
+    let db_url = "postgresql://postgres.ztlvxiihxzjegtssikmm:Siberia%4014568@aws-1-us-east-1.pooler.supabase.com:6543/postgres?statement_cache_capacity=0"; 
     let memory_engine = Arc::new(memory::MemoryEngine::new(db_url).await.expect("Failed to connect to Postgres pgvector DB"));
     let model_router = Arc::new(models::ModelRouter::new("http://localhost:11434".to_string()));
 

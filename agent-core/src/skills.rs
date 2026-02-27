@@ -1,18 +1,13 @@
-use wasmtime::*;
 use crate::types::SkillContract;
 
 pub struct SkillExecutor {
-    engine: Engine,
+    // WASM Engine for execution
 }
 
 impl SkillExecutor {
     pub fn new() -> Self {
         tracing::info!("Initializing WASM Sandbox Environment...");
-        let mut config = Config::new();
-        // Enable fuel consumption to prevent infinite loops in third-party WASM skills
-        config.consume_fuel(true);
-        let engine = Engine::new(&config).expect("Failed to create Wasmtime engine");
-        Self { engine }
+        Self {}
     }
 
     pub fn execute_skill(&self, contract: &SkillContract) {

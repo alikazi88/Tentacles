@@ -1,5 +1,4 @@
 use pgvector::Vector;
-use serde_json::Value;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
