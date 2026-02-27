@@ -1,0 +1,607 @@
+name: "Tentacles AI OS Development"
+version: "1.0.0"
+description: "Build an advanced multi-agent AI operating system with modular skills and neural memory"
+
+project_type: "fullstack_web_application"
+priority: "critical"
+
+# Technology Stack Definition
+stack:
+  frontend:
+    framework: "React 18.2.0"
+    build_tool: "Vite 5.0.0"
+    language: "TypeScript 5.3.0"
+    styling: "Tailwind CSS 3.4.0"
+    state_management: "Zustand 4.4.0"
+    server_state: "@tanstack/react-query 5.0.0"
+    routing: "react-router-dom 6.20.0"
+    ui_library: "@headlessui/react 1.7.0"
+    icons: "lucide-react 0.294.0"
+    markdown: "react-markdown 9.0.0"
+    syntax_highlighting: "prismjs 1.29.0"
+    realtime_client: "@supabase/supabase-js 2.38.0"
+  
+  backend:
+    platform: "Supabase"
+    database: "PostgreSQL 15 + pgvector extension"
+    auth: "Supabase Auth (magic link + OAuth)"
+    functions: "Supabase Edge Functions (Deno)"
+    realtime: "Supabase Realtime"
+    storage: "Supabase Storage"
+  
+  agent_core:
+    language: "Rust (preferred) or Go"
+    framework: "Axum + Tokio (Rust) or Gin (Go)"
+    sandbox: "wasmtime for WASM execution"
+    local_llm: "Ollama REST API"
+  
+  ai_models:
+    local:
+      - "llama3.1:8b (general)"
+      - "codellama:13b (code)"
+      - "mistral:7b (writing)"
+      - "llava:13b (vision)"
+    cloud_fallback:
+      - "gpt-4o-mini (cheap)"
+      - "claude-3.5-sonnet (quality)"
+      - "gpt-4o (vision + complex)"
+
+# Project Structure
+structure:
+  root:
+    - ".antigravity" # This file
+    - "README.md"
+    - "package.json"
+    - "vite.config.ts"
+    - "tailwind.config.js"
+    - "tsconfig.json"
+    - ".env.example"
+  
+  src:
+    components:
+      - "layout/ (AppLayout, Sidebar, Header)"
+      - "chat/ (ChatContainer, MessageBubble, MessageInput)"
+      - "agents/ (AgentCard, AgentConfig, AgentSelector)"
+      - "skills/ (SkillCard, SkillBuilder, SkillExecution)"
+      - "memory/ (MemoryBrowser, EntityCard, RelationGraph)"
+      - "workflows/ (WorkflowCanvas, WorkflowNode)"
+      - "common/ (Button, Input, Modal, Dropdown)"
+    
+    hooks:
+      - "useAuth.ts"
+      - "useAgents.ts"
+      - "useChat.ts"
+      - "useSkills.ts"
+      - "useMemory.ts"
+      - "useRealtime.ts"
+    
+    stores:
+      - "authStore.ts"
+      - "agentStore.ts"
+      - "chatStore.ts"
+      - "settingsStore.ts"
+    
+    lib:
+      - "supabase.ts"
+      - "ollama.ts"
+      - "wasm.ts"
+      - "embeddings.ts"
+    
+    types:
+      - "index.ts (all TypeScript interfaces)"
+    
+    routes:
+      - "Landing.tsx"
+      - "Auth.tsx"
+      - "Onboarding.tsx"
+      - "Chat.tsx"
+      - "Agents.tsx"
+      - "Skills.tsx"
+      - "Memory.tsx"
+      - "Workflows.tsx"
+      - "Dashboard.tsx"
+      - "Settings.tsx"
+  
+  supabase:
+    migrations: "SQL schema files"
+    functions: "Edge Functions (Deno)"
+    seed: "Initial data"
+
+# Critical Implementation Phases
+phases:
+  phase_1_foundation:
+    duration: "2 weeks"
+    critical: true
+    tasks:
+      - "Setup Supabase project with all tables from schema"
+      - "Configure Auth (magic links, OAuth providers)"
+      - "Enable RLS policies on all tables"
+      - "Setup React + Vite + Tailwind project"
+      - "Configure Zustand stores"
+      - "Setup TanStack Query"
+      - "Create base layout components"
+      - "Implement authentication flows"
+      - "Create protected route wrapper"
+    
+    deliverables:
+      - "Working auth system"
+      - "Database schema deployed"
+      - "Basic navigation layout"
+  
+  phase_2_agents:
+    duration: "2 weeks"
+    critical: true
+    dependencies: ["phase_1_foundation"]
+    tasks:
+      - "Create agents table and CRUD API"
+      - "Build Agent Command Center UI"
+      - "Implement agent configuration modal"
+      - "Create default agent presets (Generalist, Coder, Researcher, Writer)"
+      - "Build agent switching mechanism"
+      - "Implement agent status tracking"
+      - "Create agent-specific system prompts"
+    
+    deliverables:
+      - "Agent management fully functional"
+      - "4 default agents configured"
+      - "Agent switching in UI"
+  
+  phase_3_chat:
+    duration: "2 weeks"
+    critical: true
+    dependencies: ["phase_2_agents"]
+    tasks:
+      - "Build conversation table and messages table"
+      - "Create chat interface with message threading"
+      - "Implement streaming responses (WebSocket/SSE)"
+      - "Build message input with rich features"
+      - "Create message rendering components (user, agent, system)"
+      - "Implement file attachments"
+      - "Add syntax highlighting for code"
+      - "Build conversation history sidebar"
+      - "Implement conversation persistence"
+    
+    deliverables:
+      - "Full chat functionality"
+      - "Streaming working"
+      - "File attachments"
+      - "Code highlighting"
+  
+  phase_4_skills:
+    duration: "2 weeks"
+    critical: true
+    dependencies: ["phase_3_chat"]
+    tasks:
+      - "Create skills table and manifest schema"
+      - "Build Skill Studio UI"
+      - "Implement 4 built-in skills: FileOps, WebSearch, CodeExecutor, MemoryQuery"
+      - "Create WASM sandbox runtime"
+      - "Build skill execution engine"
+      - "Implement permission system for skills"
+      - "Create skill audit logging"
+      - "Build skill marketplace UI (placeholder)"
+    
+    deliverables:
+      - "4 working built-in skills"
+      - "Skill execution sandbox"
+      - "Permission system"
+      - "Skill Studio functional"
+  
+  phase_5_models:
+    duration: "2 weeks"
+    critical: true
+    dependencies: ["phase_4_skills"]
+    tasks:
+      - "Setup Ollama integration (local models)"
+      - "Configure cloud API clients (OpenAI, Anthropic)"
+      - "Build model routing engine"
+      - "Implement task classification"
+      - "Create model selection matrix"
+      - "Build cost tracking system"
+      - "Implement budget caps and alerts"
+      - "Create model usage dashboard"
+    
+    deliverables:
+      - "Local + cloud model routing"
+      - "Cost tracking"
+      - "Budget controls"
+      - "Usage analytics"
+  
+  phase_6_memory:
+    duration: "2 weeks"
+    critical: true
+    dependencies: ["phase_5_models"]
+    tasks:
+      - "Enable pgvector extension"
+      - "Build entity extraction pipeline"
+      - "Create embedding generation service"
+      - "Implement graph memory storage"
+      - "Build semantic search API"
+      - "Create Memory Explorer UI (graph/timeline/list)"
+      - "Implement auto-remember from conversations"
+      - "Build memory query interface"
+      - "Create entity relationship visualization"
+    
+    deliverables:
+      - "Graph memory system"
+      - "Semantic search"
+      - "Memory Explorer UI"
+      - "Auto-extraction working"
+  
+  phase_7_workflows:
+    duration: "2 weeks"
+    dependencies: ["phase_6_memory"]
+    tasks:
+      - "Create workflows table"
+      - "Build visual workflow canvas (React Flow or similar)"
+      - "Implement workflow node types"
+      - "Build workflow execution engine"
+      - "Create workflow triggers (manual, schedule, webhook)"
+      - "Implement workflow run history"
+      - "Build workflow templates"
+    
+    deliverables:
+      - "Visual workflow builder"
+      - "Workflow execution"
+      - "Trigger system"
+  
+  phase_8_polish:
+    duration: "2 weeks"
+    dependencies: ["phase_7_workflows"]
+    tasks:
+      - "Build main dashboard"
+      - "Create settings pages (all 11 sections)"
+      - "Implement dark/light mode"
+      - "Add responsive mobile layout"
+      - "Create loading states and skeletons"
+      - "Add error boundaries"
+      - "Implement optimistic updates"
+      - "Add keyboard shortcuts"
+      - "Create onboarding tooltips"
+      - "Build help documentation"
+    
+    deliverables:
+      - "Complete dashboard"
+      - "All settings functional"
+      - "Mobile responsive"
+      - "Polished UX"
+
+# Database Schema (Critical)
+schema:
+  sql: |
+    -- Core tables that must be created first
+    create extension if not exists vector;
+    
+    create table public.profiles (
+      id uuid references auth.users primary key,
+      username text unique,
+      full_name text,
+      avatar_url text,
+      use_case text,
+      default_agent_id uuid,
+      model_config jsonb default '{}',
+      daily_budget_cap decimal(10,2) default 20.00,
+      created_at timestamp with time zone default timezone('utc'::text, now()),
+      updated_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.agents (
+      id uuid default gen_random_uuid() primary key,
+      user_id uuid references public.profiles(id) not null,
+      name text not null,
+      agent_type text check (agent_type in ('generalist', 'coder', 'researcher', 'writer', 'analyst', 'planner', 'custom')),
+      system_prompt text,
+      model_config jsonb,
+      is_active boolean default true,
+      is_default boolean default false,
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.skills (
+      id uuid default gen_random_uuid() primary key,
+      user_id uuid references public.profiles(id),
+      name text not null,
+      category text check (category in ('system', 'integration', 'data', 'creative', 'ai', 'custom')),
+      manifest jsonb not null,
+      is_builtin boolean default false,
+      is_enabled boolean default true,
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.agent_skills (
+      id uuid default gen_random_uuid() primary key,
+      agent_id uuid references public.agents(id) on delete cascade,
+      skill_id uuid references public.skills(id) on delete cascade,
+      config jsonb default '{}',
+      is_enabled boolean default true,
+      unique(agent_id, skill_id)
+    );
+    
+    create table public.conversations (
+      id uuid default gen_random_uuid() primary key,
+      user_id uuid references public.profiles(id) not null,
+      title text default 'New Conversation',
+      agent_id uuid references public.agents(id),
+      model_used text,
+      cost_accumulated decimal(10,4) default 0,
+      token_count integer default 0,
+      message_count integer default 0,
+      is_active boolean default true,
+      last_message_at timestamp with time zone default timezone('utc'::text, now()),
+      metadata jsonb default '{}',
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.messages (
+      id uuid default gen_random_uuid() primary key,
+      conversation_id uuid references public.conversations(id) on delete cascade,
+      role text check (role in ('user', 'assistant', 'system', 'agent_switch')) not null,
+      content text not null,
+      agent_id uuid references public.agents(id),
+      reasoning_chain jsonb,
+      tool_calls jsonb,
+      skill_executions jsonb,
+      model_used text,
+      tokens_used integer,
+      cost decimal(10,6),
+      latency_ms integer,
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.memory_entities (
+      id uuid default gen_random_uuid() primary key,
+      user_id uuid references public.profiles(id) not null,
+      entity_type text check (entity_type in ('person', 'project', 'topic', 'file', 'event', 'decision', 'organization')) not null,
+      name text not null,
+      description text,
+      properties jsonb default '{}',
+      embedding vector(1536),
+      sentiment text,
+      importance_score float default 0.5,
+      first_seen_at timestamp with time zone default timezone('utc'::text, now()),
+      last_seen_at timestamp with time zone default timezone('utc'::text, now()),
+      mention_count integer default 1,
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    create table public.memory_relations (
+      id uuid default gen_random_uuid() primary key,
+      user_id uuid references public.profiles(id) not null,
+      source_entity_id uuid references public.memory_entities(id) on delete cascade,
+      target_entity_id uuid references public.memory_entities(id) on delete cascade,
+      relation_type text not null,
+      strength float default 0.5,
+      evidence jsonb,
+      created_at timestamp with time zone default timezone('utc'::text, now())
+    );
+    
+    -- Enable RLS
+    alter table public.profiles enable row level security;
+    alter table public.agents enable row level security;
+    alter table public.skills enable row level security;
+    alter table public.agent_skills enable row level security;
+    alter table public.conversations enable row level security;
+    alter table public.messages enable row level security;
+    alter table public.memory_entities enable row level security;
+    alter table public.memory_relations enable row level security;
+    
+    -- RLS Policies
+    create policy "Users own their agents"
+      on public.agents for all using (auth.uid() = user_id);
+    
+    create policy "Users own their conversations"
+      on public.conversations for all using (auth.uid() = user_id);
+    
+    create policy "Users own their messages"
+      on public.messages for all 
+      using (
+        conversation_id in (
+          select id from public.conversations where user_id = auth.uid()
+        )
+      );
+    
+    create policy "Users own their memory"
+      on public.memory_entities for all using (auth.uid() = user_id);
+    
+    -- Indexes
+    create index idx_conversations_user_id on public.conversations(user_id);
+    create index idx_conversations_last_message on public.conversations(last_message_at desc);
+    create index idx_messages_conversation_id on public.messages(conversation_id);
+    create index idx_messages_created_at on public.messages(created_at);
+    create index idx_memory_entities_user_id on public.memory_entities(user_id);
+    create index idx_memory_entities_type on public.memory_entities(entity_type);
+    create index idx_memory_entities_embedding on public.memory_entities using ivfflat (embedding vector_cosine_ops);
+
+# Environment Variables
+env_template: |
+  # Supabase
+  VITE_SUPABASE_URL=your_supabase_project_url
+  VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+  
+  # Ollama (local LLM)
+  OLLAMA_BASE_URL=http://localhost:11434
+  
+  # Cloud LLM Providers (fallback)
+  OPENAI_API_KEY=sk-...
+  ANTHROPIC_API_KEY=sk-ant-...
+  
+  # Agent Core (if separate server)
+  AGENT_CORE_URL=http://localhost:8080
+  AGENT_CORE_SECRET=your_secret_key
+  
+  # Application
+  VITE_APP_NAME=Tentacles
+  VITE_DEFAULT_MODEL=llama3.1:8b
+
+# Built-in Skills Manifests
+builtin_skills:
+  file_operations:
+    name: "File Operations"
+    category: "system"
+    icon: "📁"
+    description: "Read, write, and manage files in the workspace"
+    permissions: ["file_system:read", "file_system:write"]
+    inputs:
+      - name: "action"
+        type: "enum"
+        options: ["read", "write", "list", "search", "delete"]
+        required: true
+      - name: "path"
+        type: "string"
+        required: true
+      - name: "content"
+        type: "string"
+        required: false
+    outputs:
+      - name: "result"
+        type: "object"
+    sandbox: false
+  
+  web_search:
+    name: "Web Search"
+    category: "system"
+    icon: "🔍"
+    description: "Search the web using DuckDuckGo"
+    permissions: ["network:search"]
+    inputs:
+      - name: "query"
+        type: "string"
+        required: true
+      - name: "results_count"
+        type: "number"
+        default: 5
+    outputs:
+      - name: "results"
+        type: "array"
+    sandbox: false
+  
+  code_executor:
+    name: "Code Executor"
+    category: "system"
+    icon: "💻"
+    description: "Execute Python or JavaScript code in a sandboxed environment"
+    permissions: ["sandbox:execution"]
+    inputs:
+      - name: "language"
+        type: "enum"
+        options: ["python", "javascript"]
+        required: true
+      - name: "code"
+        type: "string"
+        required: true
+      - name: "timeout"
+        type: "number"
+        default: 30
+    outputs:
+      - name: "output"
+        type: "string"
+      - name: "execution_time"
+        type: "number"
+    sandbox: true
+    runtime: "wasm"
+    memory_limit: "128mb"
+    cpu_limit: "1000ms"
+  
+  memory_query:
+    name: "Memory Query"
+    category: "ai"
+    icon: "🧠"
+    description: "Search and retrieve information from the memory graph"
+    permissions: ["memory:read"]
+    inputs:
+      - name: "query"
+        type: "string"
+        required: true
+      - name: "entity_type"
+        type: "enum"
+        options: ["all", "person", "project", "topic", "file", "event"]
+        default: "all"
+      - name: "limit"
+        type: "number"
+        default: 10
+    outputs:
+      - name: "entities"
+        type: "array"
+      - name: "relations"
+        type: "array"
+    sandbox: false
+
+# Code Quality Standards
+quality:
+  typescript:
+    strict: true
+    noImplicitAny: true
+    strictNullChecks: true
+  
+  linting:
+    eslint: "standard configuration with React hooks"
+    prettier: "consistent formatting"
+  
+  testing:
+    unit: "Jest + React Testing Library, >80% coverage"
+    e2e: "Playwright for critical paths"
+  
+  performance:
+    bundle_size: "< 500KB initial load"
+    lighthouse_score: "> 90 all categories"
+  
+  accessibility: "WCAG 2.1 AA compliance"
+
+# Documentation Requirements
+documentation:
+  required_files:
+    - "README.md (setup, architecture, features)"
+    - "API.md (endpoint documentation)"
+    - "DEPLOYMENT.md (step-by-step deployment)"
+    - "CONTRIBUTING.md (development guidelines)"
+  
+  inline_docs:
+    - "JSDoc for all functions"
+    - "Component prop interfaces"
+    - "Complex algorithm explanations"
+
+# Communication Protocol
+communication:
+  before_starting: |
+    1. Confirm understanding of all 8 phases
+    2. Verify tech stack versions
+    3. Check for any conflicting requirements
+    4. Confirm database schema understanding
+  
+  during_implementation: |
+    1. Report progress after each phase
+    2. Highlight any blockers immediately
+    3. Ask before making architectural changes
+    4. Provide code snippets for complex logic
+  
+  after_completion: |
+    1. Verify all deliverables
+    2. Run full test suite
+    3. Check performance metrics
+    4. Confirm documentation completeness
+
+# Success Criteria
+success:
+  functional: |
+    - User can signup with magic link in < 30 seconds
+    - 4 default agents available immediately
+    - Chat streaming feels instant (< 100ms first token)
+    - Skills execute in sandbox without errors
+    - Memory auto-extracts from conversations
+    - Model routing selects appropriate model
+    - Budget caps prevent overspending
+  
+  technical: |
+    - All RLS policies active
+    - WASM sandbox fuel limits enforced
+    - Streaming works for all model types
+    - Vector search returns results < 500ms
+    - Mobile responsive on all screen sizes
+  
+  quality: |
+    - Zero TypeScript errors
+    - >80% test coverage
+    - Lighthouse score > 90
+    - No console errors in production
+    - Accessible via keyboard/screen reader
