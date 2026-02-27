@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Plus, Power, Settings2, Sparkles, TerminalSquare, BookOpen, PenTool, BrainCircuit } from 'lucide-react'
 import { useAgentStore } from '../store/agentStore'
-import type { AgentType } from '../store/agentStore'
+import type { Agent, AgentType } from '../store/agentStore'
+import { AgentConfigModal } from '../components/agents/AgentConfigModal'
 
 const AgentIcon = ({ type }: { type: AgentType }) => {
     switch (type) {
@@ -15,6 +16,20 @@ const AgentIcon = ({ type }: { type: AgentType }) => {
 export function Agents() {
     const { agents, fetchAgents, toggleAgentActive } = useAgentStore()
     const [searchTerm, setSearchTerm] = useState('')
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+
+    const handleOpenModal = (agent?: Agent) => {
+        setSelectedAgent(agent || null)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedAgent(null)
+    }
 
     useEffect(() => {
         fetchAgents()
@@ -41,7 +56,10 @@ export function Agents() {
                             className="bg-surface/50 border border-borderLight rounded-lg pl-4 pr-4 py-2 text-sm text-textPrimary focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all w-64"
                         />
                     </div>
-                    <button className="btn-primary flex items-center gap-2">
+                    <button
+                        onClick={() => handleOpenModal()}
+                        className="btn-primary flex items-center gap-2"
+                    >
                         <Plus size={18} /> New Agent
                     </button>
                 </div>
@@ -62,7 +80,11 @@ export function Agents() {
                                 >
                                     <Power size={18} />
                                 </button>
-                                <button className="p-2 rounded-lg text-textSecondary bg-surface hover:text-white transition-colors" title="Settings">
+                                <button
+                                    onClick={() => handleOpenModal(agent)}
+                                    className="p-2 rounded-lg text-textSecondary bg-surface hover:text-white transition-colors"
+                                    title="Settings"
+                                >
                                     <Settings2 size={18} />
                                 </button>
                             </div>
@@ -92,6 +114,12 @@ export function Agents() {
                     </div>
                 ))}
             </div>
+
+            <AgentConfigModal
+                agent={selectedAgent}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </div>
     )
 }

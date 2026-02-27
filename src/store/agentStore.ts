@@ -11,6 +11,9 @@ export interface Agent {
     is_active: boolean
     is_default: boolean
     system_prompt?: string
+    model?: string
+    temperature?: number
+    skills?: string[]
 }
 
 interface AgentState {
@@ -19,6 +22,8 @@ interface AgentState {
     fetchAgents: () => Promise<void>
     toggleAgentActive: (id: string, active: boolean) => Promise<void>
     addAgent: (agent: Partial<Agent>) => Promise<void>
+    updateAgent: (id: string, updates: Partial<Agent>) => Promise<void>
+    deleteAgent: (id: string) => Promise<void>
 }
 
 // Temporary mock data until Supabase integration is fully wired in Phase 2
@@ -30,6 +35,9 @@ const MOCK_AGENTS: Agent[] = [
         agent_type: 'generalist',
         is_active: true,
         is_default: true,
+        model: 'llama3:latest',
+        temperature: 0.7,
+        skills: ['web_search', 'memory_query']
     },
     {
         id: '2',
@@ -38,6 +46,9 @@ const MOCK_AGENTS: Agent[] = [
         agent_type: 'coder',
         is_active: true,
         is_default: false,
+        model: 'codellama:13b',
+        temperature: 0.2,
+        skills: ['file_ops', 'terminal_exec']
     },
     {
         id: '3',
@@ -46,6 +57,9 @@ const MOCK_AGENTS: Agent[] = [
         agent_type: 'researcher',
         is_active: false,
         is_default: false,
+        model: 'mistral:latest',
+        temperature: 0.5,
+        skills: ['web_search', 'document_parse']
     },
     {
         id: '4',
@@ -54,6 +68,9 @@ const MOCK_AGENTS: Agent[] = [
         agent_type: 'writer',
         is_active: false,
         is_default: false,
+        model: 'llama3:latest',
+        temperature: 0.8,
+        skills: ['document_parse']
     }
 ]
 
@@ -80,9 +97,23 @@ export const useAgentStore = create<AgentState>((set) => ({
             agent_type: agent.agent_type || 'custom',
             is_active: true,
             is_default: false,
+            model: agent.model || 'llama3:latest',
+            temperature: agent.temperature || 0.7,
+            skills: agent.skills || [],
+            system_prompt: agent.system_prompt || ''
         }
         set((state) => ({
             agents: [...state.agents, newAgent]
+        }))
+    },
+    updateAgent: async (id, updates) => {
+        set((state) => ({
+            agents: state.agents.map(a => a.id === id ? { ...a, ...updates } : a)
+        }))
+    },
+    deleteAgent: async (id) => {
+        set((state) => ({
+            agents: state.agents.filter(a => a.id !== id)
         }))
     }
 }))
