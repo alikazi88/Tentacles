@@ -4,6 +4,10 @@ import { AppLayout } from './components/layout/AppLayout'
 import { Dashboard } from './routes/Dashboard'
 import { Agents } from './routes/Agents'
 import { Chat } from './routes/Chat'
+import { Skills } from './routes/Skills'
+import { Memory } from './routes/Memory'
+import { Workflows } from './routes/Workflows'
+import { Models } from './routes/Models'
 
 export default function App() {
   return (
@@ -14,9 +18,10 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="chat" element={<Chat />} />
           <Route path="agents" element={<Agents />} />
-          <Route path="skills" element={<div className="text-white text-2xl font-bold p-8">Skills Studio Placeholder</div>} />
-          <Route path="memory" element={<div className="text-white text-2xl font-bold p-8">Memory Browser Placeholder</div>} />
-          <Route path="workflows" element={<div className="text-white text-2xl font-bold p-8">Workflow Canvas Placeholder</div>} />
+          <Route path="models" element={<Models />} />
+          <Route path="skills" element={<Skills />} />
+          <Route path="memory" element={<Memory />} />
+          <Route path="workflows" element={<Workflows />} />
           <Route path="settings" element={<div className="text-white text-2xl font-bold p-8">Settings Placeholder</div>} />
         </Route>
       </Routes>

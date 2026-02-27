@@ -8,6 +8,7 @@ export function AppLayout() {
         { label: 'Dashboard', path: '/dashboard' },
         { label: 'Chat', path: '/chat' },
         { label: 'Agents', path: '/agents' },
+        { label: 'Models', path: '/models' },
         { label: 'Skills', path: '/skills' },
         { label: 'Memory', path: '/memory' },
         { label: 'Workflows', path: '/workflows' }

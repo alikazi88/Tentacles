@@ -13,6 +13,7 @@
     "@headlessui/react": "^2.2.9",
     "@supabase/supabase-js": "^2.98.0",
     "@tanstack/react-query": "^5.90.21",
+    "@xyflow/react": "^12.10.1",
     "lucide-react": "^0.575.0",
     "partysocket": "^1.1.16",
     "prismjs": "^1.30.0",
@@ -20,6 +21,7 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1",
+    "reactflow": "^11.11.4",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
