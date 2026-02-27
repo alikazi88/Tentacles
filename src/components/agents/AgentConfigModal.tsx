@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Save, Trash2, Cpu, Wrench, Settings2, Image as ImageIcon } from 'lucide-react'
 import { useAgentStore } from '../../store/agentStore'
+import { useModelStore } from '../../store/modelStore'
 import type { Agent } from '../../store/agentStore'
 
 interface AgentConfigModalProps {
@@ -9,13 +10,7 @@ interface AgentConfigModalProps {
     onClose: () => void
 }
 
-const AVAILABLE_MODELS = [
-    { id: 'llama3:latest', name: 'Llama 3 8B (Local)' },
-    { id: 'codellama:13b', name: 'CodeLlama 13B (Local)' },
-    { id: 'mistral:latest', name: 'Mistral 7B (Local)' },
-    { id: 'gpt-4o', name: 'GPT-4o (Cloud)' },
-    { id: 'claude-3-5', name: 'Claude 3.5 Sonnet (Cloud)' },
-]
+
 
 const AVAILABLE_SKILLS = [
     { id: 'web_search', name: 'Web Search', icon: '🌐' },
@@ -27,6 +22,7 @@ const AVAILABLE_SKILLS = [
 
 export function AgentConfigModal({ agent, isOpen, onClose }: AgentConfigModalProps) {
     const { updateAgent, addAgent, deleteAgent } = useAgentStore()
+    const { models } = useModelStore()
     const isNew = !agent
 
     // Local form state
@@ -41,7 +37,7 @@ export function AgentConfigModal({ agent, isOpen, onClose }: AgentConfigModalPro
                 description: '',
                 agent_type: 'custom',
                 system_prompt: '',
-                model: 'llama3:latest',
+                model: models.length > 0 ? models[0].id : 'qwen3:8b',
                 temperature: 0.7,
                 skills: [],
                 is_active: true,
@@ -160,13 +156,17 @@ export function AgentConfigModal({ agent, isOpen, onClose }: AgentConfigModalPro
                             <div className="space-y-2">
                                 <label className="text-[11px] text-textSecondary uppercase tracking-wider font-medium">Primary Model</label>
                                 <select
-                                    value={formData.model || 'llama3:latest'}
+                                    value={formData.model || (models.length > 0 ? models[0].id : 'qwen3:8b')}
                                     onChange={e => setFormData({ ...formData, model: e.target.value })}
-                                    className="w-full bg-background border border-borderLight rounded-lg px-4 py-2.5 text-sm text-white focus:border-neon focus:ring-1 focus:ring-neon transition-all outline-none appearance-none"
+                                    className="w-full bg-background border border-borderLight rounded-lg px-4 py-2.5 text-sm text-white focus:border-neon focus:ring-1 focus:ring-neon transition-all outline-none appearance-none font-mono"
                                 >
-                                    {AVAILABLE_MODELS.map(m => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
+                                    {models.length > 0 ? (
+                                        models.map(m => (
+                                            <option key={m.id} value={m.id}>{m.name} ({m.provider})</option>
+                                        ))
+                                    ) : (
+                                        <option value="qwen3:8b">qwen3:8b (Ollama)</option>
+                                    )}
                                 </select>
                             </div>
                             <div className="space-y-2">

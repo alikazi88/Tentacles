@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Cpu, Server, Box, Globe, Settings2, Plus, AlertCircle, Signal, Shield, CheckCircle2, Zap, GitBranch } from 'lucide-react'
 import { useModelStore, type ModelProvider } from '../store/modelStore'
+import { AddModelModal } from '../components/models/AddModelModal'
 
 const ProviderIcon = ({ provider }: { provider: ModelProvider }) => {
     switch (provider) {
@@ -28,6 +30,8 @@ export function Models() {
         toggleModelActive,
         toggleRuleActive
     } = useModelStore()
+
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
     const localModels = models.filter(m => m.is_local)
     const remoteModels = models.filter(m => !m.is_local)
@@ -77,7 +81,10 @@ export function Models() {
                             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                 <Server size={20} className="text-neon" /> Local Cluster (Ollama)
                             </h3>
-                            <button className="text-xs font-medium text-neon hover:text-neon/80 bg-neon/10 hover:bg-neon/20 px-3 py-1.5 rounded-lg border border-neon/20 transition-colors flex items-center gap-2">
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="text-xs font-medium text-neon hover:text-neon/80 bg-neon/10 hover:bg-neon/20 px-3 py-1.5 rounded-lg border border-neon/20 transition-colors flex items-center gap-2"
+                            >
                                 <Plus size={14} /> Pull Model
                             </button>
                         </div>
@@ -139,7 +146,10 @@ export function Models() {
                             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                 <Globe size={20} className="text-cyan-400" /> Cloud Ecosystem
                             </h3>
-                            <button className="text-xs font-medium text-textSecondary hover:text-white bg-surface hover:bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 transition-colors flex items-center gap-2">
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="text-xs font-medium text-textSecondary hover:text-white bg-surface hover:bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 transition-colors flex items-center gap-2"
+                            >
                                 <Settings2 size={14} /> Add Provider
                             </button>
                         </div>
@@ -248,6 +258,11 @@ export function Models() {
                 </div>
             )}
 
+            {/* Add Model Modal */}
+            <AddModelModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+            />
         </div>
     )
 }

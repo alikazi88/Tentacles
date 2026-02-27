@@ -15,7 +15,7 @@ const MessageBubble = ({ msg }: { msg: Message }) => {
             <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-white">
-                        {isUser ? 'You' : 'Nexus Generalist'} {/* Hardcoded agent name for now, will dynamic map later */}
+                        {isUser ? 'You' : 'Assistant'}
                     </span>
                     <span className="text-[10px] text-textSecondary uppercase tracking-wider">
                         {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -26,30 +26,7 @@ const MessageBubble = ({ msg }: { msg: Message }) => {
                 </div>
 
                 {/* Optional Tool Render (mocking this visually for now) */}
-                {msg.role === 'assistant' && msg.content.includes('SQL') && (
-                    <div className="mt-4 bg-[#1A1A1C] border border-white/5 rounded-xl overflow-hidden font-mono text-xs">
-                        <div className="bg-white/5 border-b border-white/5 px-4 py-2 flex items-center justify-between text-textSecondary">
-                            <span>schema.sql</span>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full border border-white/20"></span>
-                                <span className="w-2.5 h-2.5 rounded-full border border-white/20"></span>
-                                <span className="w-2.5 h-2.5 rounded-full border border-white/20"></span>
-                            </div>
-                        </div>
-                        <div className="p-4 text-emerald-400 opacity-80 overflow-x-auto">
-                            <pre>
-                                <code>
-                                    {`CREATE TABLE agents (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    system_prompt TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);`}
-                                </code>
-                            </pre>
-                        </div>
-                    </div>
-                )}
+
             </div>
         </div>
     )
@@ -83,11 +60,6 @@ export function Chat() {
         if (!input.trim()) return
         sendMessage(input.trim(), 'user')
         setInput('')
-
-        // Mock bot response
-        setTimeout(() => {
-            sendMessage('This is a simulated response processed by the local WASM cluster.', 'assistant')
-        }, 1000)
     }
 
     return (

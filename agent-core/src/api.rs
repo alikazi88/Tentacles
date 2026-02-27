@@ -1,4 +1,5 @@
-use axum::{extract::State, routing::post, Json, Router};
+use axum::{extract::State, routing::post, Json, Router, http::Method};
+use tower_http::cors::{Any, CorsLayer};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use crate::orchestrator::AgentOrchestrator;
@@ -11,8 +12,14 @@ pub struct AppState {
 }
 
 pub fn router(state: Arc<AppState>) -> Router {
+    let cors = CorsLayer::new()
+        .allow_origin(Any) // For development, allow any origin. In production, specify frontend URL.
+        .allow_methods([Method::POST, Method::GET, Method::OPTIONS])
+        .allow_headers(Any);
+
     Router::new()
         .route("/api/v1/chat", post(handle_chat))
+        .layer(cors)
         .with_state(state)
 }
 

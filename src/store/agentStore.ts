@@ -26,63 +26,16 @@ interface AgentState {
     deleteAgent: (id: string) => Promise<void>
 }
 
-// Temporary mock data until Supabase integration is fully wired in Phase 2
-const MOCK_AGENTS: Agent[] = [
-    {
-        id: '1',
-        name: 'Nexus Generalist',
-        description: 'Versatile AI assistant capable of handling a broad range of tasks and orchestration.',
-        agent_type: 'generalist',
-        is_active: true,
-        is_default: true,
-        model: 'llama3:latest',
-        temperature: 0.7,
-        skills: ['web_search', 'memory_query']
-    },
-    {
-        id: '2',
-        name: 'CodeWeaver',
-        description: 'Specialized in Rust, TypeScript, and architectural system design. Can execute local dev environments.',
-        agent_type: 'coder',
-        is_active: true,
-        is_default: false,
-        model: 'codellama:13b',
-        temperature: 0.2,
-        skills: ['file_ops', 'terminal_exec']
-    },
-    {
-        id: '3',
-        name: 'DeepSearch',
-        description: 'Autonomous researcher that navigates the web, synthesizes sources, and builds comprehensive reports.',
-        agent_type: 'researcher',
-        is_active: false,
-        is_default: false,
-        model: 'mistral:latest',
-        temperature: 0.5,
-        skills: ['web_search', 'document_parse']
-    },
-    {
-        id: '4',
-        name: 'CipherWriter',
-        description: 'Expert copywriter for technical documentation, blog posts, and persuasive communications.',
-        agent_type: 'writer',
-        is_active: false,
-        is_default: false,
-        model: 'llama3:latest',
-        temperature: 0.8,
-        skills: ['document_parse']
-    }
-]
+
 
 export const useAgentStore = create<AgentState>((set) => ({
-    agents: MOCK_AGENTS,
+    agents: [],
     isLoading: false,
     fetchAgents: async () => {
-        // Scaffolded for Supabase fetch
         set({ isLoading: true })
-        // Simulate network
+        // Future: Fetch from Supabase
         await new Promise(r => setTimeout(r, 600))
-        set({ agents: MOCK_AGENTS, isLoading: false })
+        set({ agents: [], isLoading: false })
     },
     toggleAgentActive: async (id, active) => {
         set((state) => ({

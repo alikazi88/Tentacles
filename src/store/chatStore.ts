@@ -26,30 +26,11 @@ interface ChatState {
     createNewConversation: () => void
 }
 
-const MOCK_CONVERSATIONS: Conversation[] = [
-    {
-        id: '1',
-        title: 'Project Setup Planning',
-        updated_at: new Date(Date.now() - 1000 * 60 * 60),
-        messages: [
-            { id: '1-1', role: 'user', content: 'Can we outline the database schema?', timestamp: new Date(Date.now() - 1000 * 60 * 65) },
-            { id: '1-2', role: 'assistant', content: 'Certainly. I recommend a core layout with Profiles, Agents, and Workflows tables. Shall I generate the SQL?', timestamp: new Date(Date.now() - 1000 * 60 * 64) }
-        ]
-    },
-    {
-        id: '2',
-        title: 'Debugging CI Pipeline',
-        updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        messages: [
-            { id: '2-1', role: 'user', content: 'Why is the GitHub action failing on the rust build step?', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-            { id: '2-2', role: 'assistant', content: 'Based on the logs, it appears you are missing the `wasm32-wasi` target. Add `rustup target add wasm32-wasi` before building.', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) }
-        ]
-    }
-]
+
 
 export const useChatStore = create<ChatState>((set) => ({
-    activeConversationId: '1',
-    conversations: MOCK_CONVERSATIONS,
+    activeConversationId: null,
+    conversations: [],
     setActiveConversation: (id) => set({ activeConversationId: id }),
     createNewConversation: () => {
         const id = Math.random().toString(36).substring(7)
@@ -64,30 +45,84 @@ export const useChatStore = create<ChatState>((set) => ({
             activeConversationId: id
         }))
     },
-    sendMessage: (content, role = 'user') => {
-        set((state) => {
-            const activeId = state.activeConversationId
-            if (!activeId) return state
+    sendMessage: async (content, role = 'user') => {
+        const activeId = useChatStore.getState().activeConversationId
+        if (!activeId) return
 
-            const newMessage: Message = {
+        const userMessage: Message = {
+            id: Math.random().toString(36).substring(7),
+            role,
+            content,
+            timestamp: new Date()
+        }
+
+        // Add user message immediately
+        set((state) => ({
+            conversations: state.conversations.map(conv => {
+                if (conv.id === activeId) {
+                    return {
+                        ...conv,
+                        updated_at: new Date(),
+                        messages: [...conv.messages, userMessage]
+                    }
+                }
+                return conv
+            })
+        }))
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: content,
+                    conversation_id: activeId,
+                    agent_id: null // To be expanded in Agent System phase
+                })
+            })
+
+            const data = await response.json()
+
+            if (data.status === 'success') {
+                const assistantMessage: Message = {
+                    id: Math.random().toString(36).substring(7),
+                    role: 'assistant',
+                    content: data.reply,
+                    timestamp: new Date()
+                }
+
+                set((state) => ({
+                    conversations: state.conversations.map(conv => {
+                        if (conv.id === activeId) {
+                            return {
+                                ...conv,
+                                messages: [...conv.messages, assistantMessage]
+                            }
+                        }
+                        return conv
+                    })
+                }))
+            }
+        } catch (error) {
+            console.error('Failed to send message to Agent Core:', error)
+            const errorMessage: Message = {
                 id: Math.random().toString(36).substring(7),
-                role,
-                content,
+                role: 'system',
+                content: 'Failed to connect to Intelligence Layer. Make sure Agent Core is running.',
                 timestamp: new Date()
             }
-
-            return {
+            set((state) => ({
                 conversations: state.conversations.map(conv => {
                     if (conv.id === activeId) {
                         return {
                             ...conv,
-                            updated_at: new Date(),
-                            messages: [...conv.messages, newMessage]
+                            messages: [...conv.messages, errorMessage]
                         }
                     }
                     return conv
                 })
-            }
-        })
+            }))
+        }
     }
 }))
+
