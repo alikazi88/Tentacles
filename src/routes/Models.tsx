@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Cpu, Server, Box, Globe, Settings2, Plus, AlertCircle, Signal, Shield, CheckCircle2, Zap, GitBranch } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Cpu, Server, Box, Globe, Settings2, Plus, AlertCircle, Signal, Shield, CheckCircle2, Zap, GitBranch, Trash2 } from 'lucide-react'
 import { useModelStore, type ModelProvider } from '../store/modelStore'
 import { AddModelModal } from '../components/models/AddModelModal'
+import { AddRoutingRuleModal } from '../components/models/AddRoutingRuleModal'
 
 const ProviderIcon = ({ provider }: { provider: ModelProvider }) => {
     switch (provider) {
@@ -27,11 +28,18 @@ export function Models() {
         routingRules,
         activeTab,
         setActiveTab,
+        fetchModels,
         toggleModelActive,
-        toggleRuleActive
+        toggleRuleActive,
+        deleteRoutingRule
     } = useModelStore()
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [isAddRuleModalOpen, setIsAddRuleModalOpen] = useState(false)
+
+    useEffect(() => {
+        fetchModels()
+    }, [fetchModels])
 
     const localModels = models.filter(m => m.is_local)
     const remoteModels = models.filter(m => !m.is_local)
@@ -207,51 +215,83 @@ export function Models() {
                 <div className="space-y-6 max-w-4xl opacity-0 animate-[fadeIn_0.3s_ease_forwards]">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white">Execution Fallback Matrix</h3>
-                        <button className="btn-primary flex items-center gap-2 text-xs py-1.5 px-3">
+                        <button
+                            onClick={() => setIsAddRuleModalOpen(true)}
+                            className="btn-primary flex items-center gap-2 text-xs py-1.5 px-3"
+                        >
                             <Plus size={14} /> New Rule
                         </button>
                     </div>
 
-                    {routingRules.map((rule, idx) => (
-                        <div key={rule.id} className="glass-card p-5 bg-surface/30 border-white/5 flex items-center gap-6 relative">
-                            {/* Sequence Number */}
-                            <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-background border border-borderLight flex items-center justify-center text-xs font-mono text-textSecondary shadow-sm">
-                                {idx + 1}
-                            </div>
-
-                            <div className="flex-1 space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="font-semibold text-white">{rule.name}</h4>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" className="sr-only peer" checked={rule.is_active} onChange={(e) => toggleRuleActive(rule.id, e.target.checked)} />
-                                        <div className="w-8 h-4 bg-background peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-textSecondary peer-checked:after:bg-black after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-white shadow-inner border border-white/10"></div>
-                                    </label>
-                                </div>
-
-                                <div className="bg-black/30 border border-white/5 rounded-lg p-2 text-xs font-mono text-cyan-400">
-                                    <span className="text-textSecondary/50 mr-2">IF</span> {rule.condition}
-                                </div>
-
-                                <div className="flex items-center gap-3 text-sm">
-                                    <span className="text-textSecondary text-[10px] uppercase font-semibold tracking-wider">THEN USE</span>
-                                    <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-white flex items-center gap-1.5 font-medium shadow-inner">
-                                        <CheckCircle2 size={12} className="text-emerald-400" /> {rule.primary_model_id}
-                                    </span>
-
-                                    {rule.fallback_model_id && (
-                                        <>
-                                            <span className="text-textSecondary text-[10px] uppercase font-semibold tracking-wider px-2">ELSE</span>
-                                            <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-white flex items-center gap-1.5 font-medium shadow-inner opacity-80">
-                                                <AlertCircle size={12} className="text-yellow-500" /> {rule.fallback_model_id}
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                    {routingRules.length === 0 && (
+                        <div className="p-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-textSecondary text-sm bg-surface/10">
+                            <GitBranch size={48} className="mb-4 opacity-20" />
+                            <p>No routing rules defined yet.</p>
+                            <button
+                                onClick={() => setIsAddRuleModalOpen(true)}
+                                className="mt-4 text-neon hover:underline"
+                            >
+                                Create your first intelligent routing rule
+                            </button>
                         </div>
-                    ))}
+                    )}
 
-                    <div className="p-6 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-textSecondary text-sm hover:border-white/20 hover:text-white transition-all cursor-pointer bg-surface/10">
+                    {routingRules.map((rule, idx) => {
+                        const primaryModel = models.find(m => m.id === rule.primary_model_id)
+                        const fallbackModel = models.find(m => m.id === rule.fallback_model_id)
+
+                        return (
+                            <div key={rule.id} className="glass-card p-5 bg-surface/30 border-white/5 flex items-center gap-6 relative group">
+                                {/* Sequence Number */}
+                                <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-background border border-borderLight flex items-center justify-center text-xs font-mono text-textSecondary shadow-sm">
+                                    {idx + 1}
+                                </div>
+
+                                <div className="flex-1 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="font-semibold text-white">{rule.name}</h4>
+                                        <div className="flex items-center gap-4">
+                                            <button
+                                                onClick={() => deleteRoutingRule(rule.id)}
+                                                className="p-1.5 text-textSecondary hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" className="sr-only peer" checked={rule.is_active} onChange={(e) => toggleRuleActive(rule.id, e.target.checked)} />
+                                                <div className="w-8 h-4 bg-background peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-textSecondary peer-checked:after:bg-black after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-white shadow-inner border border-white/10"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-black/30 border border-white/5 rounded-lg p-2 text-xs font-mono text-cyan-400">
+                                        <span className="text-textSecondary/50 mr-2">IF</span> {rule.condition}
+                                    </div>
+
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <span className="text-textSecondary text-[10px] uppercase font-semibold tracking-wider">THEN USE</span>
+                                        <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-white flex items-center gap-1.5 font-medium shadow-inner">
+                                            <CheckCircle2 size={12} className="text-emerald-400" /> {primaryModel?.name || rule.primary_model_id}
+                                        </span>
+
+                                        {rule.fallback_model_id && (
+                                            <>
+                                                <span className="text-textSecondary text-[10px] uppercase font-semibold tracking-wider px-2">ELSE</span>
+                                                <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-white flex items-center gap-1.5 font-medium shadow-inner opacity-80">
+                                                    <AlertCircle size={12} className="text-yellow-500" /> {fallbackModel?.name || rule.fallback_model_id}
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+
+                    <div
+                        onClick={() => setIsAddRuleModalOpen(true)}
+                        className="p-6 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-textSecondary text-sm hover:border-white/20 hover:text-white transition-all cursor-pointer bg-surface/10"
+                    >
                         <Plus size={24} className="mb-2 opacity-50" />
                         Add final sweep/catch-all model rule
                     </div>
@@ -262,6 +302,12 @@ export function Models() {
             <AddModelModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
+            />
+
+            {/* Add Routing Rule Modal */}
+            <AddRoutingRuleModal
+                isOpen={isAddRuleModalOpen}
+                onClose={() => setIsAddRuleModalOpen(false)}
             />
         </div>
     )

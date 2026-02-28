@@ -7,6 +7,7 @@ use crate::types::ContextPackage;
 use uuid::Uuid;
 use chrono::Utc;
 
+#[derive(Clone)]
 pub struct AppState {
     pub orchestrator: Arc<AgentOrchestrator>,
 }

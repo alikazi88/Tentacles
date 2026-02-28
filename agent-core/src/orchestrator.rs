@@ -1,5 +1,5 @@
 use crate::memory::MemoryEngine;
-use crate::models::ModelRouter;
+use crate::models::AgentModelRouter;
 use crate::skills::SkillExecutor;
 use crate::types::ContextPackage;
 use std::sync::Arc;
@@ -7,14 +7,14 @@ use serde_json::Value;
 use regex::Regex;
 
 pub struct AgentOrchestrator {
-    pub model_router: Arc<ModelRouter>,
+    pub model_router: Arc<AgentModelRouter>,
     pub memory_engine: Arc<MemoryEngine>,
     pub skill_executor: Arc<SkillExecutor>,
 }
 
 impl AgentOrchestrator {
     pub fn new(
-        model_router: Arc<ModelRouter>, 
+        model_router: Arc<AgentModelRouter>, 
         memory_engine: Arc<MemoryEngine>,
         skill_executor: Arc<SkillExecutor>
     ) -> Self {

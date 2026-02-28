@@ -35,6 +35,8 @@ interface ModelState {
     toggleModelActive: (id: string, active: boolean) => Promise<void>
     toggleRuleActive: (id: string, active: boolean) => Promise<void>
     addModel: (model: Partial<Model>) => Promise<void>
+    addRoutingRule: (rule: Partial<RoutingRule>) => Promise<void>
+    deleteRoutingRule: (id: string) => Promise<void>
     addProvider: (provider: any) => void // Placeholder for now
 }
 
@@ -125,6 +127,50 @@ export const useModelStore = create<ModelState>((set) => ({
 
         set(state => ({
             models: [data, ...state.models]
+        }))
+    },
+
+    addRoutingRule: async (rule) => {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const newRule = {
+            name: rule.name || 'New Rule',
+            condition: rule.condition || "task == 'general'",
+            primary_model_id: rule.primary_model_id,
+            fallback_model_id: rule.fallback_model_id,
+            is_active: true,
+            user_id: user?.id
+        }
+
+        const { data, error } = await supabase
+            .from('routing_rules')
+            .insert([newRule])
+            .select()
+            .single()
+
+        if (error) {
+            console.error('Error adding routing rule:', error)
+            return
+        }
+
+        set(state => ({
+            routingRules: [data, ...state.routingRules]
+        }))
+    },
+
+    deleteRoutingRule: async (id) => {
+        const { error } = await supabase
+            .from('routing_rules')
+            .delete()
+            .eq('id', id)
+
+        if (error) {
+            console.error('Error deleting routing rule:', error)
+            return
+        }
+
+        set(state => ({
+            routingRules: state.routingRules.filter(r => r.id !== id)
         }))
     },
 

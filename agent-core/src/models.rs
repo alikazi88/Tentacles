@@ -4,13 +4,13 @@ use sqlx::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
 
-pub struct ModelRouter {
+pub struct AgentModelRouter {
     client: Client,
     pub local_host: String,
     pub pool: Option<Arc<PgPool>>,
 }
 
-impl ModelRouter {
+impl AgentModelRouter {
     pub fn new(local_host: String, pool: Option<Arc<PgPool>>) -> Self {
         tracing::info!("Initializing Intelligent Model Router (Ollama @ {})", local_host);
         Self {
@@ -32,14 +32,18 @@ impl ModelRouter {
         }
     }
 
-    /// Finds the best model for a given task by querying routing rules.
+    /// Finds the best model for a given task by querying routing rules and joining with the models table.
     async fn get_routing_target(&self, task: &str) -> (String, Option<String>) {
         if let Some(pool) = &self.pool {
             let row = sqlx::query(
                 r#"
-                SELECT primary_model_id, fallback_model_id 
-                FROM routing_rules 
-                WHERE name = $1 AND is_active = true
+                SELECT 
+                    m1.name as primary_name,
+                    m2.name as fallback_name
+                FROM routing_rules r
+                JOIN models m1 ON r.primary_model_id = m1.id
+                LEFT JOIN models m2 ON r.fallback_model_id = m2.id
+                WHERE r.name = $1 AND r.is_active = true
                 LIMIT 1
                 "#
             )
@@ -49,11 +53,10 @@ impl ModelRouter {
 
             if let Ok(Some(row)) = row {
                 use sqlx::Row;
-                let primary: Uuid = row.get("primary_model_id");
-                let fallback: Option<Uuid> = row.get("fallback_model_id");
+                let primary: String = row.get("primary_name");
+                let fallback: Option<String> = row.get("fallback_name");
                 
-                // Fetch model name (this is a simplified lookup)
-                return (primary.to_string(), fallback.map(|u| u.to_string()));
+                return (primary, fallback);
             }
         }
         
@@ -61,7 +64,7 @@ impl ModelRouter {
     }
 
     /// Primary inference router deciding how to handle a turn and generating the response.
-    pub async fn route_inference(&self, model: &str, prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn route_inference(&self, model: &str, prompt: &str) -> Result<String, String> {
         let task = self.classify_task(prompt);
         let (target_model, fallback) = self.get_routing_target(&task).await;
         
@@ -83,7 +86,7 @@ impl ModelRouter {
         }
     }
 
-    async fn execute_inference(&self, model: &str, prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+    async fn execute_inference(&self, model: &str, prompt: &str) -> Result<String, String> {
         let url = format!("{}/api/generate", self.local_host);
         let payload = json!({
             "model": model,
@@ -94,17 +97,17 @@ impl ModelRouter {
         let response = self.client.post(&url)
             .json(&payload)
             .send()
-            .await?;
+            .await.map_err(|e| e.to_string())?;
 
         if !response.status().is_success() {
-            return Err(format!("Model API error: {}", response.status()).into());
+            return Err(format!("Model API error: {}", response.status()));
         }
 
-        let resp_json: serde_json::Value = response.json().await?;
+        let resp_json: serde_json::Value = response.json().await.map_err(|e| e.to_string())?;
         if let Some(reply) = resp_json.get("response").and_then(|r| r.as_str()) {
             Ok(reply.to_string())
         } else {
-            Err("Failed to parse Ollama response format".into())
+            Err("Failed to parse Ollama response format".to_string())
         }
     }
 }
