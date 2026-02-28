@@ -95,7 +95,74 @@ RULES:
             final_response = final_response.split("Final Answer:").last().unwrap_or(&final_response).trim().to_string();
         }
 
+        // --- Auto-Remember Phase ---
+        // Extract and index semantic entities from the user's message
+        let _ = self.auto_remember(context.user_id, message).await;
+
         final_response
+    }
+
+    /// Background task to extract and index semantic entities
+    pub async fn auto_remember(&self, user_id: uuid::Uuid, text: &str) -> Result<(), String> {
+        tracing::info!("Auto-Remember: Extracting entities from turn...");
+        
+        let entities = self.extract_entities(text).await?;
+        
+        for entity in entities {
+            let name = entity["name"].as_str().unwrap_or("");
+            let e_type = entity["type"].as_str().unwrap_or("topic");
+            let desc = entity["description"].as_str().unwrap_or("");
+            let importance = entity["importance"].as_f64().unwrap_or(0.5);
+
+            if name.is_empty() { continue; }
+
+            // Generate embedding for the entity name + description
+            let embed_text = format!("{}: {}", name, desc);
+            match self.model_router.generate_embedding("qwen3:8b", &embed_text).await {
+                Ok(embedding) => {
+                    let _ = self.memory_engine.insert_entity(
+                        user_id,
+                        e_type,
+                        name,
+                        desc,
+                        importance,
+                        embedding
+                    ).await.map_err(|e| e.to_string())?;
+                    tracing::debug!("Indexed entity: {} ({})", name, e_type);
+                },
+                Err(e) => tracing::error!("Failed to generate embedding for {}: {}", name, e),
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn extract_entities(&self, text: &str) -> Result<Vec<Value>, String> {
+        let prompt = format!(
+            r#"Return a JSON array of semantic entities found in the following text. 
+Identify People, Projects, Topics, Events, Organizations, or Files.
+Each entity must have: "name", "type" (one of: person, project, topic, file, event, decision, organization), "description", and "importance" (0.0 to 1.0).
+
+OUTPUT ONLY VALID JSON.
+Text: {}"#,
+            text
+        );
+
+        let response = self.model_router.route_inference("qwen3:8b", &prompt).await?;
+        
+        // Clean up response to find JSON block if model gets chatty
+        let json_str = if let Some(start) = response.find('[') {
+            if let Some(end) = response.rfind(']') {
+                &response[start..=end]
+            } else {
+                &response
+            }
+        } else {
+            &response
+        };
+
+        let entities: Vec<Value> = serde_json::from_str(json_str).map_err(|e| format!("Failed to parse entity JSON: {}", e))?;
+        Ok(entities)
     }
 
     fn parse_tool_call(&self, response: &str) -> Option<(String, Value)> {

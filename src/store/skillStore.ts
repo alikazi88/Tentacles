@@ -73,9 +73,11 @@ export const useSkillStore = create<SkillState>((set) => ({
     setActiveCategory: (category) => set({ activeCategory: category }),
 
     toggleSkillActive: async (id, active) => {
+        const { data: { user } } = await supabase.auth.getUser()
+
         const { error } = await supabase
             .from('skills')
-            .update({ is_enabled: active })
+            .update({ is_enabled: active, user_id: user?.id || null })
             .eq('id', id)
 
         if (error) {
@@ -90,9 +92,11 @@ export const useSkillStore = create<SkillState>((set) => ({
 
     installSkill: async (id) => {
         set({ isLoading: true })
+        const { data: { user } } = await supabase.auth.getUser()
+
         const { error } = await supabase
             .from('skills')
-            .update({ is_enabled: true }) // Simulating install by enabling
+            .update({ is_enabled: true, user_id: user?.id || null }) // Simulating install by enabling
             .eq('id', id)
 
         if (error) {

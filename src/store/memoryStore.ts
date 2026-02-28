@@ -1,14 +1,14 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 
-export type MemoryEntityType = 'person' | 'project' | 'concept' | 'event' | 'document' | 'other'
+export type MemoryEntityType = 'person' | 'project' | 'topic' | 'file' | 'event' | 'decision' | 'organization' | 'other'
 
 export interface MemoryEntity {
     id: string
     name: string
     type: MemoryEntityType
     summary: string
-    relevance_score: number // 0-1
+    importance_score: number // 0-1
     last_accessed: Date
     created_at: Date
 }
@@ -44,7 +44,7 @@ export const useMemoryStore = create<MemoryState>((set) => ({
     fetchMemory: async () => {
         set({ isLoading: true })
         const [entitiesRes, relationsRes] = await Promise.all([
-            supabase.from('memory_entities').select('*').order('relevance_score', { ascending: false }),
+            supabase.from('memory_entities').select('*').order('importance_score', { ascending: false }),
             supabase.from('memory_relations').select('*')
         ])
 
@@ -55,10 +55,10 @@ export const useMemoryStore = create<MemoryState>((set) => ({
             entities: (entitiesRes.data || []).map(e => ({
                 id: e.id,
                 name: e.name,
-                type: e.type as MemoryEntityType,
-                summary: e.summary || '',
-                relevance_score: e.relevance_score || 0,
-                last_accessed: new Date(e.last_accessed_at || e.created_at),
+                type: (e.entity_type || 'other') as MemoryEntityType,
+                summary: e.description || '',
+                importance_score: e.importance_score || 0,
+                last_accessed: new Date(e.last_seen_at || e.created_at),
                 created_at: new Date(e.created_at)
             })),
             relations: (relationsRes.data || []).map(r => ({

@@ -6,13 +6,16 @@ const EntityIcon = ({ type }: { type: string }) => {
     switch (type) {
         case 'person': return <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center font-bold">P</div>
         case 'project': return <div className="w-10 h-10 rounded-xl bg-neon/10 border border-neon/20 text-neon flex items-center justify-center font-bold">Pr</div>
-        case 'concept': return <div className="w-10 h-10 rounded-lg bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 flex items-center justify-center font-bold">C</div>
+        case 'topic': return <div className="w-10 h-10 rounded-lg bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 flex items-center justify-center font-bold">T</div>
+        case 'file': return <div className="w-10 h-10 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 flex items-center justify-center font-bold">F</div>
         case 'event': return <div className="w-10 h-10 rounded-full bg-orange-400/10 border border-orange-400/20 text-orange-400 flex items-center justify-center font-bold">E</div>
+        case 'decision': return <div className="w-10 h-10 rounded-lg bg-red-400/10 border border-red-400/20 text-red-400 flex items-center justify-center font-bold">D</div>
+        case 'organization': return <div className="w-10 h-10 rounded-xl bg-blue-400/10 border border-blue-400/20 text-blue-400 flex items-center justify-center font-bold">O</div>
         default: return <div className="w-10 h-10 rounded-md bg-white/5 border border-white/10 text-white/50 flex items-center justify-center font-bold">?</div>
     }
 }
 
-const RelevanceBadge = ({ score }: { score: number }) => {
+const ImportanceBadge = ({ score }: { score: number }) => {
     const color = score > 0.9 ? 'text-neon bg-neon/10 border-neon/20' :
         score > 0.8 ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' :
             score > 0.6 ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' :
@@ -20,7 +23,7 @@ const RelevanceBadge = ({ score }: { score: number }) => {
 
     return (
         <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${color} flex items-center gap-1`}>
-            {score > 0.9 && <Zap size={10} />} {(score * 100).toFixed(0)}% Relevance
+            {score > 0.9 && <Zap size={10} />} {(score * 100).toFixed(0)}% Importance
         </span>
     )
 }
@@ -43,7 +46,7 @@ export function Memory() {
                 e.summary.toLowerCase().includes(searchQuery.toLowerCase())
             const matchesType = typeFilter === 'all' || e.type === typeFilter
             return matchesSearch && matchesType
-        }).sort((a, b) => b.relevance_score - a.relevance_score)
+        }).sort((a, b) => b.importance_score - a.importance_score)
     }, [entities, searchQuery, typeFilter])
 
     return (
@@ -92,7 +95,7 @@ export function Memory() {
             {/* Filter & Search Bar */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-surface/40 p-2 rounded-2xl border border-white/5 backdrop-blur-sm shrink-0">
                 <div className="flex items-center flex-1 gap-2 w-full overflow-x-auto custom-scrollbar pb-1 md:pb-0">
-                    {['all', 'person', 'project', 'concept', 'event'].map(type => (
+                    {['all', 'person', 'project', 'topic', 'file', 'event', 'decision', 'organization'].map(type => (
                         <button
                             key={type}
                             onClick={() => setTypeFilter(type)}
@@ -142,7 +145,7 @@ export function Memory() {
                                                 <span className="text-xs text-textSecondary hidden md:inline-flex items-center gap-1.5">
                                                     <Network size={12} /> {relatedCount} edge{relatedCount !== 1 ? 's' : ''}
                                                 </span>
-                                                <RelevanceBadge score={entity.relevance_score} />
+                                                <ImportanceBadge score={entity.importance_score} />
                                                 <button className="text-textSecondary hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <ExternalLink size={16} />
                                                 </button>

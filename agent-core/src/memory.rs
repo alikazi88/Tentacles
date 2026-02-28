@@ -19,6 +19,8 @@ impl MemoryEngine {
         user_id: Uuid,
         entity_type: &str,
         name: &str,
+        description: &str,
+        importance_score: f64,
         embedding: Vec<f32>,
     ) -> Result<Uuid, sqlx::Error> {
         tracing::debug!("Inserting semantic entity: {}", name);
@@ -26,14 +28,16 @@ impl MemoryEngine {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO memory_entities (user_id, entity_type, name, embedding)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO memory_entities (user_id, entity_type, name, description, importance_score, embedding)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
             "#,
         )
         .bind(user_id)
         .bind(entity_type)
         .bind(name)
+        .bind(description)
+        .bind(importance_score)
         .bind(vec)
         .fetch_one(&self.pool)
         .await?;

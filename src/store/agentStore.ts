@@ -90,7 +90,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 model: agent.model || 'qwen3:8b',
                 temperature: agent.temperature || 0.7
             },
-            user_id: user?.id
+            user_id: user?.id || null
         }
 
         const { data, error } = await supabase

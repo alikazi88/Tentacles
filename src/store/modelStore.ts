@@ -111,7 +111,7 @@ export const useModelStore = create<ModelState>((set) => ({
             capabilities: model.capabilities || [],
             endpoint: model.endpoint,
             api_key_configured: model.api_key_configured || false,
-            user_id: user?.id
+            user_id: user?.id || null
         }
 
         const { data, error } = await supabase
@@ -139,7 +139,7 @@ export const useModelStore = create<ModelState>((set) => ({
             primary_model_id: rule.primary_model_id,
             fallback_model_id: rule.fallback_model_id,
             is_active: true,
-            user_id: user?.id
+            user_id: user?.id || null
         }
 
         const { data, error } = await supabase

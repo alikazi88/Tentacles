@@ -110,4 +110,35 @@ impl AgentModelRouter {
             Err("Failed to parse Ollama response format".to_string())
         }
     }
+
+    /// Generates a vector embedding for the given text using Ollama.
+    pub async fn generate_embedding(&self, model: &str, text: &str) -> Result<Vec<f32>, String> {
+        let url = format!("{}/api/embeddings", self.local_host);
+        let payload = json!({
+            "model": model,
+            "prompt": text
+        });
+
+        let response = self.client.post(&url)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if !response.status().is_success() {
+            return Err(format!("Embedding API error: {}", response.status()));
+        }
+
+        let resp_json: serde_json::Value = response.json().await.map_err(|e| e.to_string())?;
+        
+        if let Some(embedding) = resp_json.get("embedding").and_then(|e| e.as_array()) {
+            let vec: Vec<f32> = embedding
+                .iter()
+                .filter_map(|v| v.as_f64().map(|f| f as f32))
+                .collect();
+            Ok(vec)
+        } else {
+            Err("Failed to parse Ollama embedding format".to_string())
+        }
+    }
 }
