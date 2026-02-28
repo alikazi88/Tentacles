@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { supabase } from '../lib/supabase'
 
 export type ModelProvider = 'ollama' | 'openai' | 'anthropic' | 'custom'
 
@@ -28,10 +29,12 @@ interface ModelState {
     models: Model[]
     routingRules: RoutingRule[]
     activeTab: 'registry' | 'routing'
+    isLoading: boolean
+    fetchModels: () => Promise<void>
     setActiveTab: (tab: 'registry' | 'routing') => void
-    toggleModelActive: (id: string, active: boolean) => void
-    toggleRuleActive: (id: string, active: boolean) => void
-    addModel: (model: Model) => void
+    toggleModelActive: (id: string, active: boolean) => Promise<void>
+    toggleRuleActive: (id: string, active: boolean) => Promise<void>
+    addModel: (model: Partial<Model>) => Promise<void>
     addProvider: (provider: any) => void // Placeholder for now
 }
 
@@ -41,20 +44,89 @@ export const useModelStore = create<ModelState>((set) => ({
     models: [],
     routingRules: [],
     activeTab: 'registry',
+    isLoading: false,
+
+    fetchModels: async () => {
+        set({ isLoading: true })
+        const [modelsRes, rulesRes] = await Promise.all([
+            supabase.from('models').select('*').order('created_at', { ascending: false }),
+            supabase.from('routing_rules').select('*').order('created_at', { ascending: false })
+        ])
+
+        if (modelsRes.error) console.error('Error fetching models:', modelsRes.error)
+        if (rulesRes.error) console.error('Error fetching rules:', rulesRes.error)
+
+        set({
+            models: modelsRes.data || [],
+            routingRules: rulesRes.data || [],
+            isLoading: false
+        })
+    },
 
     setActiveTab: (tab) => set({ activeTab: tab }),
 
-    toggleModelActive: (id, active) => set(state => ({
-        models: state.models.map(m => m.id === id ? { ...m, is_active: active } : m)
-    })),
+    toggleModelActive: async (id, active) => {
+        const { error } = await supabase
+            .from('models')
+            .update({ is_active: active })
+            .eq('id', id)
 
-    toggleRuleActive: (id, active) => set(state => ({
-        routingRules: state.routingRules.map(r => r.id === id ? { ...r, is_active: active } : r)
-    })),
+        if (error) {
+            console.error('Error toggling model active state:', error)
+            return
+        }
 
-    addModel: (model) => set(state => ({
-        models: [...state.models, model]
-    })),
+        set(state => ({
+            models: state.models.map(m => m.id === id ? { ...m, is_active: active } : m)
+        }))
+    },
+
+    toggleRuleActive: async (id, active) => {
+        const { error } = await supabase
+            .from('routing_rules')
+            .update({ is_active: active })
+            .eq('id', id)
+
+        if (error) {
+            console.error('Error toggling rule active state:', error)
+            return
+        }
+
+        set(state => ({
+            routingRules: state.routingRules.map(r => r.id === id ? { ...r, is_active: active } : r)
+        }))
+    },
+
+    addModel: async (model) => {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const newModel = {
+            name: model.name || 'New Model',
+            provider: model.provider || 'ollama',
+            is_active: true,
+            is_local: model.is_local ?? true,
+            context_window: model.context_window || 4096,
+            capabilities: model.capabilities || [],
+            endpoint: model.endpoint,
+            api_key_configured: model.api_key_configured || false,
+            user_id: user?.id
+        }
+
+        const { data, error } = await supabase
+            .from('models')
+            .insert([newModel])
+            .select()
+            .single()
+
+        if (error) {
+            console.error('Error adding model:', error)
+            return
+        }
+
+        set(state => ({
+            models: [data, ...state.models]
+        }))
+    },
 
     addProvider: (provider) => {
         console.log('Adding provider:', provider)

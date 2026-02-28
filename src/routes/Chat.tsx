@@ -3,6 +3,9 @@ import { Send, Plus, Settings2, Command, FileText, Image as ImageIcon, User, Spa
 import { useChatStore } from '../store/chatStore'
 import type { Message } from '../store/chatStore'
 import { useAgentStore } from '../store/agentStore'
+import { supabase } from '../lib/supabase'
+import { v4 as uuidv4 } from 'uuid'
+import { toast } from 'react-hot-toast'
 
 const MessageBubble = ({ msg }: { msg: Message }) => {
     const isUser = msg.role === 'user'
@@ -25,8 +28,31 @@ const MessageBubble = ({ msg }: { msg: Message }) => {
                     {msg.content}
                 </div>
 
-                {/* Optional Tool Render (mocking this visually for now) */}
-
+                {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        {msg.attachments.map((file, i) => (
+                            <a
+                                key={i}
+                                href={file.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-2 p-2 rounded-lg bg-surface/50 border border-white/5 hover:border-white/20 transition-all group"
+                            >
+                                {file.type.startsWith('image/') ? (
+                                    <div className="w-10 h-10 rounded overflow-hidden bg-black/20">
+                                        <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    <FileText size={20} className="text-textSecondary group-hover:text-neon transition-colors" />
+                                )}
+                                <div className="text-[10px] pr-2">
+                                    <div className="text-white font-medium truncate max-w-[120px]">{file.name}</div>
+                                    <div className="text-textSecondary uppercase tracking-tighter opacity-50">{(file.type.split('/')[1] || '').toUpperCase()}</div>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -38,12 +64,16 @@ export function Chat() {
         activeConversationId,
         setActiveConversation,
         createNewConversation,
-        sendMessage
+        sendMessage,
+        fetchConversations
     } = useChatStore()
 
     const { agents } = useAgentStore()
 
     const [input, setInput] = useState('')
+    const [isUploading, setIsUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const imageInputRef = useRef<HTMLInputElement>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const activeConv = conversations.find(c => c.id === activeConversationId)
@@ -56,10 +86,53 @@ export function Chat() {
         scrollToBottom()
     }, [activeConv?.messages])
 
+    useEffect(() => {
+        fetchConversations()
+    }, [fetchConversations])
+
     const handleSend = () => {
         if (!input.trim()) return
         sendMessage(input.trim(), 'user')
         setInput('')
+    }
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'media' | 'documents') => {
+        const file = event.target.files?.[0]
+        if (!file || !activeConversationId) return
+
+        setIsUploading(true)
+        const toastId = toast.loading(`Uploading ${file.name}...`)
+
+        try {
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${uuidv4()}.${fileExt}`
+            const filePath = `${activeConversationId}/${fileName}`
+
+            const { error: uploadError } = await supabase.storage
+                .from(type)
+                .upload(filePath, file)
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from(type)
+                .getPublicUrl(filePath)
+
+            // Add the file to the current message being typed or send it immediately with a placeholder
+            await sendMessage(`Uploaded file: ${file.name}`, 'user', [{
+                name: file.name,
+                url: publicUrl,
+                type: file.type
+            }])
+
+            toast.success('Upload complete', { id: toastId })
+        } catch (error: any) {
+            console.error('Upload failed:', error)
+            toast.error(error.message || 'Upload failed', { id: toastId })
+        } finally {
+            setIsUploading(false)
+            if (event.target) event.target.value = ''
+        }
     }
 
     return (
@@ -137,10 +210,34 @@ export function Chat() {
                     <div className="relative group max-w-4xl mx-auto flex items-end gap-2 bg-surface/80 border border-borderLight rounded-2xl p-2 shadow-sm focus-within:border-neon/50 focus-within:ring-1 focus-within:ring-neon/50 transition-all">
 
                         <div className="flex items-center gap-1 mb-1 px-1">
-                            <button className="p-2 text-textSecondary hover:text-white rounded-xl hover:bg-white/5 transition-colors" title="Attach Document">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={(e) => handleFileUpload(e, 'documents')}
+                                accept=".pdf,.doc,.docx,.txt"
+                            />
+                            <input
+                                type="file"
+                                ref={imageInputRef}
+                                className="hidden"
+                                onChange={(e) => handleFileUpload(e, 'media')}
+                                accept="image/*"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                                className="p-2 text-textSecondary hover:text-white rounded-xl hover:bg-white/5 transition-colors disabled:opacity-30"
+                                title="Attach Document"
+                            >
                                 <FileText size={18} />
                             </button>
-                            <button className="p-2 text-textSecondary hover:text-white rounded-xl hover:bg-white/5 transition-colors" title="Attach Image">
+                            <button
+                                onClick={() => imageInputRef.current?.click()}
+                                disabled={isUploading}
+                                className="p-2 text-textSecondary hover:text-white rounded-xl hover:bg-white/5 transition-colors disabled:opacity-30"
+                                title="Attach Image"
+                            >
                                 <ImageIcon size={18} />
                             </button>
                         </div>

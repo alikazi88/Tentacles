@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { supabase } from '../lib/supabase'
 
 export type SkillCategory = 'core' | 'development' | 'web' | 'data' | 'system' | 'custom'
 
@@ -18,8 +19,10 @@ export interface Skill {
 
 interface SkillState {
     skills: Skill[]
+    isLoading: boolean
     searchQuery: string
     activeCategory: SkillCategory | 'all'
+    fetchSkills: () => Promise<void>
     setSearchQuery: (query: string) => void
     setActiveCategory: (category: SkillCategory | 'all') => void
     toggleSkillActive: (id: string, active: boolean) => Promise<void>
@@ -28,80 +31,80 @@ interface SkillState {
 
 
 
-const REAL_SKILLS: Skill[] = [
-    {
-        id: 'web_search',
-        name: 'Web Search',
-        description: 'Native DuckDuckGo search integration. Can fetch live results without an API key.',
-        category: 'web',
-        icon: '🌐',
-        version: '1.0.0',
-        author: 'Tentacles Core',
-        is_active: true,
-        is_installed: true,
-        permissions: ['network.outbound'],
-        last_updated: new Date()
-    },
-    {
-        id: 'file_ops',
-        name: 'File Operations',
-        description: 'Read and write files within the workspace boundary (d:\\Tentacles).',
-        category: 'system',
-        icon: '📁',
-        version: '1.0.0',
-        author: 'Tentacles Core',
-        is_active: true,
-        is_installed: true,
-        permissions: ['fs.read', 'fs.write'],
-        last_updated: new Date()
-    },
-    {
-        id: 'memory_query',
-        name: 'Memory Query',
-        description: 'Direct semantic search access to the pgvector memory engine.',
-        category: 'core',
-        icon: '🧠',
-        version: '1.0.0',
-        author: 'Tentacles Core',
-        is_active: true,
-        is_installed: true,
-        permissions: ['db.read'],
-        last_updated: new Date()
-    },
-    {
-        id: 'terminal_exec',
-        name: 'Terminal Execution',
-        description: 'Execute shell commands in a sandboxed terminal environment.',
-        category: 'development',
-        icon: '💻',
-        version: '1.0.0',
-        author: 'Tentacles Core',
-        is_active: true,
-        is_installed: true,
-        permissions: ['process.exec'],
-        last_updated: new Date()
-    }
-]
+// REAL_SKILLS removed as they are now seeded and fetched from Supabase
 
 export const useSkillStore = create<SkillState>((set) => ({
-    skills: REAL_SKILLS,
+    skills: [],
+    isLoading: false,
     searchQuery: '',
     activeCategory: 'all',
+
+    fetchSkills: async () => {
+        set({ isLoading: true })
+        const { data, error } = await supabase
+            .from('skills')
+            .select('*')
+            .order('name', { ascending: true })
+
+        if (error) {
+            console.error('Error fetching skills:', error)
+            set({ isLoading: false })
+            return
+        }
+
+        const formattedSkills: Skill[] = (data || []).map(s => ({
+            id: s.id,
+            name: s.name,
+            description: s.description || '',
+            category: s.category as SkillCategory,
+            icon: s.icon || '🛠️',
+            version: s.manifest?.version || '1.0.0',
+            author: s.manifest?.author || 'Unknown',
+            is_active: s.is_enabled,
+            is_installed: s.is_builtin || s.is_enabled,
+            permissions: s.permissions || [],
+            last_updated: new Date(s.created_at)
+        }))
+
+        set({ skills: formattedSkills, isLoading: false })
+    },
 
     setSearchQuery: (query) => set({ searchQuery: query }),
     setActiveCategory: (category) => set({ activeCategory: category }),
 
     toggleSkillActive: async (id, active) => {
+        const { error } = await supabase
+            .from('skills')
+            .update({ is_enabled: active })
+            .eq('id', id)
+
+        if (error) {
+            console.error('Error toggling skill active state:', error)
+            return
+        }
+
         set((state) => ({
             skills: state.skills.map((s) => (s.id === id ? { ...s, is_active: active } : s))
         }))
     },
 
     installSkill: async (id) => {
-        // Mock install delay
+        set({ isLoading: true })
+        const { error } = await supabase
+            .from('skills')
+            .update({ is_enabled: true }) // Simulating install by enabling
+            .eq('id', id)
+
+        if (error) {
+            console.error('Error installing skill:', error)
+            set({ isLoading: false })
+            return
+        }
+
         await new Promise(r => setTimeout(r, 800))
         set((state) => ({
-            skills: state.skills.map((s) => (s.id === id ? { ...s, is_installed: true, is_active: true } : s))
+            skills: state.skills.map((s) => (s.id === id ? { ...s, is_installed: true, is_active: true } : s)),
+            isLoading: false
         }))
     }
 }))
